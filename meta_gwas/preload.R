@@ -1,7 +1,7 @@
 # Pre-load data when this App is started
-SHINY_HOME<-"/zhangz/awsomics";
-RCHIVE_HOME<-Sys.getenv("RCHIVE_HOME");
-APP_HOME<-"/zhangz/awsomics/meta_gwas";
+AWSOMICS_HOME<-"/zhangz/awsomics/";
+RCHIVE_HOME<-"/zhangz/rchive/";
+APP_HOME<-paste(AWSOMICS_HOME, "meta_gwas", sep='/');
 
 # subfolders
 GWAS_HOME<-paste(RCHIVE_HOME, '/data/gwas', sep=''); # Location of GWAS data
@@ -9,7 +9,7 @@ GENE_HOME<-paste(RCHIVE_HOME, '/data/gene/public/entrez/r', sep=''); # Location 
 SNP_HOME<-paste(RCHIVE_HOME, '/data/variant', sep=''); # Location of variant information
 
 # load source code 
-src<-paste(SHINY_HOME, '/src/', dir(paste(SHINY_HOME, '/src/', sep="")), sep='');
+src<-paste(AWSOMICS_HOME, '/R/', dir(paste(AWSOMICS_HOME, '/R/', sep="")), sep='');
 src<-src[grep('.R$', src, ignore.case=TRUE)];
 src<-lapply(src, source); # load functions
 
@@ -19,9 +19,10 @@ fnc<-sapply(fn, function(fn) if (gregexpr('\\.R$', fn, ignore.case=TRUE)>0) sour
 
 ### connect to database tables
 tbls<-ConnectToGwasDb(paste(GWAS_HOME, 'db', 'gwas_phred.sqlite', sep='/'));
-tbl.pos<-tbls[['just_position']];
 tbls<-tbls[names(tbls) != 'just_position'];
-#tbls.variants<-ConnectToVariantPositionDb(paste(RCHIVE_HOME, '/variant/db/variant_position.sqlite', sep=''));
+#tbl.pos<-tbls[['just_position']];
+tbl.pos<-ConnectToVariantPositionDb(paste(RCHIVE_HOME, 'data/variant/db/variant_position.sqlite', sep='/'));
+names(tbl.pos)<-sub('^dbsnp_', '', names(tbl.pos));
 tbl2analysis<-lapply(tbls, function(t) colnames(t)[6:ncol(t)]);
 
 ##########################################################################################################

@@ -1,0 +1,19 @@
+
+Listening on http://127.0.0.1:52889
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Error in datatable(instance, ...) : 
+  'data' must be either a matrix or a data frame
+Error in which(sapply(data, is.numeric)) : 
+  argument to 'which' is not logical
+
+Execution halted

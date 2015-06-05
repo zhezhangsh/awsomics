@@ -68,7 +68,8 @@ shinyServer(function(input, output, session) {
       ##### All other searches will need to get the position first                
         # Get genomic range of searching, produce a message if range not available
         if (search.opt == search.options[1]) {        ###### search by SNP ID with end extension
-          snp.pos<-SnpPosFromGwasDb(search.key, tbl.pos, as.GRanges = FALSE, genome=selected.genome);
+          snp.pos<-SearchVariantPositionDbById(search.key, tbl.pos[[selected.genome]], as.GRanges=FALSE);
+          #snp.pos<-SnpPosFromGwasDb(search.key, tbl.pos, as.GRanges = FALSE, genome=selected.genome);
           if (nrow(snp.pos) == 0) rslt<-'SNP ID not found in dbSNP' else { # ID not found in dbSNP database
             chr<-as.vector(snp.pos[[2]])[1];
             stt<-snp.pos[1,3] - extend.length; 
@@ -110,8 +111,8 @@ shinyServer(function(input, output, session) {
       p20<-rslt[rslt$Phred>=20, , drop=FALSE];
       p20<-p20[order(p20$Phred, decreasing = TRUE), , drop=FALSE];
       p20<-p20[!duplicated(p20$Analysis), , drop=FALSE];
-      if (nrow(p20) == 0) chc<-list('NA') else chc<-paste(p20$Analysis, ' (', p20$Phred, ')', sep='');
-      updateCheckboxGroupInput(session, 'qq.highlight', choices=chc[1:min(10, length(chc))]);
+      if (nrow(p20) == 0) chc<-list() else chc<-paste(p20$Analysis, ' (', p20$Phred, ')', sep='');
+      updateCheckboxGroupInput(session, 'qq.highlight', choices=if (length(chc)>0) chc[1:min(10, length(chc))] else list());
 
       # analyses and studies the query was searching in
       ana.in<-rownames(meta.analysis)[!(rownames(meta.analysis) %in% ana.out)];
@@ -141,18 +142,31 @@ shinyServer(function(input, output, session) {
   ######################################## "Search" tab #############################################
   # table title
   output$search.table.title<-renderUI({
-    if (input$search.value == '' | input$check.refresh) h3('Search GWAS results of your favorite SNP, gene, or genomic region') else 
-      h2(paste('Search result: ', input$search.options, ' = ', input$search.value, sep=''));
-  })
-  
-  # table body
-  output$search.table <- renderDataTable({
-    if (!input$check.refresh) {
-      rslt<-search.rslt();
+    if (input$search.value == '' | input$check.refresh) list(h1('Welcome to AWSOMICS: Meta-GWAS'), h6("beta version")) else 
+      h2(paste('Query: ', input$search.options, ' = ', input$search.value, sep=''));
+  });
 
+  # Search table message
+  output$search.table.message<-renderUI({
+    msg<-'';
+    if (input$check.refresh) msg<-"Look up your favorite SNP, gene, or genomic region:" else {
+      rslt<-search.rslt();
+      if (identical(rslt, NA)) 
+        msg<-"Look up your favorite SNP, gene, or genomic region:" else if (is.character(rslt$phred)) 
+          msg<-rslt$phred else if (nrow(rslt$phred) == 0)
+            msg<-"No GWAS rsult was found.";
+    }
+    if (identical(msg, NA) | msg[[1]]=='') list(hr()) else list(hr(), h4(msg), hr());
+  });
+
+  # table body
+  output$search.table <- DT::renderDataTable({
+      if (!input$check.refresh) {
+      rslt<-search.rslt();
+      
       # re-formatting the result table
       # add an column (analysis name)
-      if(identical(NA, rslt)) rslt<-NA else if (is.character(rslt$phred)) rslt<-data.frame('Message' = rslt) else if (nrow(rslt$phred) == 0 ) rslt<-data.frame('Message' = 'No Phred score found') else {
+      if(identical(NA, rslt)) rslt<-NA else if (is.character(rslt$phred) | nrow(rslt$phred)==0) rslt<-NA else {
         rslt<-rslt$phred;
         rslt<-cbind(rslt, Analysis_Name=as.vector(meta.analysis[as.vector(rslt$Analysis), 'Name']));
         rslt$Rank<-getPhredRank(as.vector(rslt[, 'Analysis']), rslt[, 'Phred'], phred.top, meta.analysis);
@@ -168,8 +182,9 @@ shinyServer(function(input, output, session) {
         rslt<-rslt[, rslt.cnm];
 
         if (length(input$mask.p.values) > 0) rslt[['Phred']]<-'[Masked]';
+        
+        has.result<-TRUE;
       }
-      rslt;
     } else {
       # clear options
       updateCheckboxInput(session, inputId='check.refresh', value=FALSE);
@@ -182,8 +197,16 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId='search.restrict.to',  value='');
       updateTextInput(session, inputId='max.phred.range',  value='30-300');      
       updateCheckboxGroupInput(session, inputId='exclude.table', selected=list());
+      rslt<-NA;
     }
-  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE));
+    if (!(class(rslt) %in% c('matrix', 'data.frame'))) {
+      rslt<-data.frame('C1' = 'No search results');
+      colnames(rslt)<-'';
+    }
+
+    rslt;
+  }, options=list(
+    autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25), rownames=FALSE, escape=FALSE);
   ###################################################################################################
   
   ###################################################################################################
@@ -230,10 +253,10 @@ shinyServer(function(input, output, session) {
   
   ###################################################################################################
   ######################################## "Browse" tab #############################################
-  output$browse.table.title<-renderUI({h2(paste('All', input$browse.options, 'in archive'))});
-  output$browse.table <- renderDataTable({
+  output$browse.table.title<-renderUI({ h2(paste('All archived', input$browse.options)) });
+  output$browse.table <- DT::renderDataTable({
     browse.tbls[[input$browse.options]];
-  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE));
+  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25), rownames=FALSE, escape=FALSE);
   ###################################################################################################
 
   ###########################################################################################
@@ -246,20 +269,20 @@ shinyServer(function(input, output, session) {
   ######################################## "Summary" tab ############################################
   output$summary.table.title<-renderUI({
     rslt<-search.rslt();
-    if(identical(NA, rslt)) h3("Summary of results by IDs (waiting for search results ...)") else h2(paste(input$search.options, input$search.value, sep=' = '))
+    if(identical(NA, rslt)) h2("Summary of search results") else h2('Query:', paste(input$search.options, '=', input$search.value))
   });  
-  output$summary.table <- renderDataTable({
-   summarize.results(search.rslt(), input$summary.options, summary.options, input$summary.minimum.phred);
-  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE));
+  output$summary.table <- DT::renderDataTable({
+   meta.gwas.summarize.results(search.rslt(), input$summary.options, summary.options, input$summary.minimum.phred);
+  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25), rownames=FALSE, escape=FALSE);
   
   ###################################################################################################
   ######################################## "QQplot" tab #############################################
   output$qqplot.title<-renderUI({
     rslt<-search.rslt();
-    if(identical(NA, rslt)) h3("QQ plot of GWAS p values (waiting for search results ...)") else h2(paste(input$search.options, input$search.value, sep=' = '))
+    if(identical(NA, rslt)) h2("QQ plot of GWAS p values") else h2(paste('Query:', input$search.options, '=', input$search.value))
   });
   output$qqplot <- renderPlot({
-    meta.gwas.plot.qq(search.rslt(), input$qq.highlight);
+    meta.gwas.plot.qq(search.rslt(), input$qq.highlight);  
   }, height=600, width=600);
   ###################################################################################################
   
@@ -267,7 +290,7 @@ shinyServer(function(input, output, session) {
   ######################################## "Manhattan" tab ##########################################
   output$manhattan.plot.title<-renderUI({
     rslt<-search.rslt();
-    if(identical(NA, rslt)) h3("2D or 3D Manhattan plot of GWAS p values (waiting for search results ...)") else h2(paste(input$search.options, input$search.value, sep=' = '))
+    if(identical(NA, rslt)) h2("2D or 3D Manhattan plot of GWAS p values") else h2(paste('Query:', input$search.options, '=', input$search.value))
   });
   output$manhattan.plot <- renderPlot({
     meta.gwas.manhantan3d(search.rslt());
@@ -280,9 +303,9 @@ shinyServer(function(input, output, session) {
     rslt<-search.rslt();
     if(identical(NA, rslt)) h3("Enrichment of keywords related to top hits (waiting for search results ...)") else h2(paste(input$search.options, input$search.value, sep=' = '))
   });  
-  output$enrichment.table <- renderDataTable({
-    meta.gwas.enrichment(search.rslt(), input$enrich.minimum.phred, input$enrich.minimum.count, input$keyword.options, key.enrich);
-  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE));
+  output$enrichment.table <- DT::renderDataTable({
+   meta.gwas.enrichment(search.rslt(), input$enrich.minimum.phred, input$enrich.minimum.count, input$keyword.options, key.enrich);
+  }, options=list(autoWidth = FALSE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25), rownames=FALSE, escape=FALSE);
   ###################################################################################################
   
 })

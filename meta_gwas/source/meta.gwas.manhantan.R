@@ -2,7 +2,9 @@
 meta.gwas.manhantan3d<-function(rslt) {
   # re-formatting the result table
   # add an column (analysis name)
-  if(identical(NA, rslt)) rslt<-NA else if (is.character(rslt$phred)) rslt<-data.frame('Message' = rslt$phred) else {
+  if(identical(NA, rslt)) NA else if (is.character(rslt$phred) | nrow(rslt$phred)==0) {
+    plot(0, xaxt='n', yaxt='n', cex.lab=1.5, xlab='Analysis', ylab='SNP', cex=0, main='No GWAS rsult was found.');
+  } else{
     rslt<-rslt$phred;
     n.snp<-length(unique(rslt$SNP));
     par(mar=c(5,5,2,2));
@@ -40,7 +42,6 @@ meta.gwas.manhantan3d<-function(rslt) {
       
       scatterplot3d(anas[rslt$Analysis], ps[rslt$SNP], rslt$Phred, zlab='Phred', xlab='Analysis', ylab='SNP', cex.lab=2, main='Manhattan plot', 
                     cex.main=2, color=col, pch=19, axis=TRUE, x.ticklabs=names(anas), y.ticklabs=names(ps));
-    }
-    
+    }  
   }
 }

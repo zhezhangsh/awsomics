@@ -1,8 +1,8 @@
 # Perform keyword enrichment analysis based on search results
-meta.gwas.enrichment<-function(rslt, minimum.phred, minimum.count, key.option, key.enrich) {  
+meta.gwas.enrichment<-function(rslt, minimum.phred, minimum.count, key.option, key.enrich) {   
   # re-formatting the result table
-  # add an column (analysis name)
-  if(identical(NA, rslt)) rslt<-NA else if (is.character(rslt$phred)) rslt<-data.frame('Message' = rslt$phred) else if (nrow(rslt$phred) == 0 ) rslt<-data.frame('Message' = 'No Phred score found') else {
+  # add an column (analysis name)    
+  if(identical(NA, rslt)) rich.tbl<-data.frame('Message'="No search results") else if (is.character(rslt$phred)) rich.tbl<-data.frame('Message' = rslt$phred) else if (nrow(rslt$phred) == 0 ) rich.tbl<-data.frame('Message' = 'No GWAS rsult was found.') else {   
     # full result table and result table including only Phred score greater than threshold   
     rslt.ttl<-rslt$phred; # full search result
     rslt.up<-rslt.ttl[rslt.ttl$Phred>=minimum.phred, , drop=FALSE]; # search result with Phred score above cutoff
@@ -42,5 +42,9 @@ meta.gwas.enrichment<-function(rslt, minimum.phred, minimum.count, key.option, k
     }
     ##############################################################################################################
   }
+  
+  if (identical(rich.tbl, NA)) rich.tbl<-data.frame("Message"="No GWAS rsult was found.");
+  if (colnames(rich.tbl)[1] == "Message") colnames(rich.tbl)<-"";
+  
   rich.tbl;
 }

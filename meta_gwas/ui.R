@@ -1,16 +1,18 @@
 print("loading UI");
-print(system.time(source('preload.r')));
 
-shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, title='Meta-GWAS',
+print(system.time(source("/zhangz/awsomics/meta_gwas/preload.R")));
+
+shinyUI(navbarPage("Meta-GWAS", collapsible = TRUE, title='Meta-GWAS',
                    
             ############################################################################## 
             ################################ "Search" tab ################################ 
             tabPanel("Search", 
                      htmlOutput('search.table.title'),
-                     dataTableOutput('search.table'),
+                     htmlOutput('search.table.message'),                     
+                     DT::dataTableOutput('search.table'),
                      
                      ######################################### Search panel ######################################### 
-                     absolutePanel(top = 50, right = 10, width=275, draggable = TRUE, style = "opacity: 0.9",           
+                     absolutePanel(top = 60, right = 10, width=275, draggable = TRUE, style = "opacity: 1",            
                                    wellPanel(
                                      #################### Basic search options ###################
                                      textInput(inputId="search.value", label="", value=""), # input search key
@@ -60,7 +62,7 @@ shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, ti
             ################################ "Factoid" tab ############################### 
             tabPanel("Factoid", 
                      wellPanel(htmlOutput("factoid.text"), style = "background-color: #ffffff;"),
-                     absolutePanel(top = 50, right = 10, width=240, draggable = TRUE, style = "opacity: 0.9",                      
+                     absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                      
                                    wellPanel(
                                      selectInput("factoid.options", "", width=200, factoid.types), # select search type
                                      textInput(inputId="factoid.key", label="", value=""), # input search key
@@ -74,8 +76,8 @@ shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, ti
             ################################# "Browse" tab ############################### 
             tabPanel("Browse",
                     htmlOutput('browse.table.title'),
-                    dataTableOutput('browse.table'),
-                    absolutePanel(top = 50, right = 10, width=240, draggable = TRUE, style = "opacity: 0.9",                        
+                    DT::dataTableOutput('browse.table'),
+                    absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                        
                                   wellPanel(
                                     #style = "background-color: #ffffee;",
                                     selectInput("browse.options", "", names(browse.tbls)),
@@ -93,8 +95,8 @@ shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, ti
             ############################# "Summary" tab ###############################
             tabPanel("Summary",
                    htmlOutput('summary.table.title'),
-                   dataTableOutput('summary.table'),
-                   absolutePanel(top = 50, right = 10, width=240, draggable = TRUE, style = "opacity: 0.9",                        
+                   DT::dataTableOutput('summary.table'),
+                   absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                        
                                  wellPanel(
                                    selectInput("summary.options", "", width=200, summary.options), # select search type
                                    sliderInput('summary.minimum.phred', h5('Minimum Phred'), 0, 60, 20, step=1),
@@ -110,9 +112,9 @@ shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, ti
                      htmlOutput('qqplot.title'),
                      plotOutput('qqplot'),
  
-                     absolutePanel(top = 50, right = 10, width=240, draggable = TRUE, style = "opacity: 0.9",                        
+                     absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                        
                                    wellPanel(
-                                     checkboxGroupInput("qq.highlight", h5("Highlight (Max Phred):"), list('NA')),
+                                     checkboxGroupInput("qq.highlight", h5("Highlight (Max Phred):"), list()),
                                      submitButton("Refresh", icon=icon('refresh'))
                                    )                 
                      ) # end of absolutePanel     
@@ -139,8 +141,8 @@ shinyUI(navbarPage("Meta-GWAS", header=c('beta version'), collapsable = TRUE, ti
           ############################# "Enrichment" tab ###############################
           tabPanel("Enrichment",
                    htmlOutput('enrichment.table.title'),
-                   dataTableOutput('enrichment.table'),
-                   absolutePanel(top = 50, right = 10, width=240, draggable = TRUE, style = "opacity: 0.9",                        
+                   DT::dataTableOutput('enrichment.table'),
+                   absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                        
                                  wellPanel(
                                    selectInput("keyword.options", "", width=200, names(key.enrich)), # select search type
                                    sliderInput('enrich.minimum.phred', h5('Minimum Phred'), 0, 60, 20, step=1),

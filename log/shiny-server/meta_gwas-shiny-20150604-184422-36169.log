@@ -1,0 +1,23 @@
+
+Listening on http://127.0.0.1:36169
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Error in (function (choice, name)  : 
+  All sub-lists in "choices" must be named.
+Error in (function (choice, name)  : 
+  All sub-lists in "choices" must be named.
+Error in (function (choice, name)  : 
+  All sub-lists in "choices" must be named.
+Error in (function (choice, name)  : 
+  All sub-lists in "choices" must be named.
+
+Execution halted

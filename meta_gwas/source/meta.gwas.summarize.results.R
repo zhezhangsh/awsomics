@@ -1,5 +1,5 @@
 # Utility function that summarizes search results for the "Secondary analyses -> "Summary" tab
-summarize.results<-function(rslt, opt, summary.options, minimum.phred) {
+meta.gwas.summarize.results<-function(rslt, opt, summary.options, minimum.phred) {
   # rslt              Result set returned from the search.rslt<-reactive reactive expression
   # opt               User specified summary option
   # summary.options   Available summary options
@@ -7,7 +7,7 @@ summarize.results<-function(rslt, opt, summary.options, minimum.phred) {
   
   # re-formatting the result table
   # add an column (analysis name)
-  if(identical(NA, rslt)) smm<-NA else if (is.character(rslt$phred)) smm<-data.frame('Message' = rslt$phred) else if (nrow(rslt$phred) == 0 ) smm<-data.frame('Message' = 'No Phred score found') else {
+  if(identical(NA, rslt)) smm<-data.frame('Message'="No search results") else if (is.character(rslt$phred)) smm<-data.frame('Message' = rslt$phred) else if (nrow(rslt$phred) == 0 ) smm<-data.frame('Message' = 'No GWAS rsult was found.') else {    
     ana.ttl<-rslt$analysis;
     #std.ttl<-rslt$study;
     
@@ -109,5 +109,9 @@ summarize.results<-function(rslt, opt, summary.options, minimum.phred) {
     }
     ##############################################################################################################
   }
+  
+  if (identical(smm, NA)) smm<-data.frame("Message"="No GWAS rsult was found.");
+  if (colnames(smm)[1] == "Message") colnames(smm)<-"";
+  
   smm;
 }

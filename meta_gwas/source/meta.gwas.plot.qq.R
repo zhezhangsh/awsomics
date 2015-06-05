@@ -5,7 +5,9 @@ meta.gwas.plot.qq<-function(rslt, highlight=c()) {
       
   # re-formatting the result table
   # add an column (analysis name)
-  if(identical(NA, rslt)) rslt<-NA else if (is.character(rslt$phred)) rslt<-data.frame('Message' = rslt$phred) else {
+  if(identical(NA, rslt)) NA else if (is.character(rslt$phred) | nrow(rslt$phred)==0) {
+    plot(0, xaxt='n', yaxt='n', cex.lab=1.5, xlab='Expected -Log10(p value)', ylab='Observed -Log10(p value)', cex=0, main='No GWAS rsult was found.'); 
+  } else {
     rslt<-rslt$phred;
     p<-rslt$Phred;
     
@@ -20,6 +22,6 @@ meta.gwas.plot.qq<-function(rslt, highlight=c()) {
         for (i in 1:length(chosen.ana)) col[rslt$Analysis == chosen.ana[i]]<-sub('FF$', '88', cls[i]);
       }
     }
-    PlotQqFromPhred(p, col=col);
+    PlotQqFromPhred(p, col=col, cex=1.5);
   }
 }

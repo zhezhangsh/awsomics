@@ -39,7 +39,7 @@ SearchGwasDbById<-function(ids, tbls=NA, db=NA, fn=NA, genome=c('GRCh38', 'GRCh3
         ###########################################################################
         # query tables to get phred scores
         phred<-lapply(tbls, function(t) {
-            if (length(ids)==1) out<-filter(t, id==ids) else out<-filter(t, id %in% ids);
+            if (length(ids)==1) out<-dplyr::filter(t, id==ids) else out<-dplyr::filter(t, id %in% ids);
             if (genome[1]=='GRCh37') ind<-c(1,2,4, 6:ncol(out)) else ind<-c(1,3,5,6:ncol(out)); 
             out<-dplyr::select(out, ind); 
             CollectGwasDbData(out, min.phred, analyses.out=analyses.out);
@@ -86,10 +86,10 @@ SearchGwasDbByLoci<-function(chrom, start, end, tbls=NA, db=NA, fn=NA, genome=c(
         # query tables to get phred scores
         phred<-lapply(tbls, function(t) {
             if (genome[1] == 'GRCh37') {
-                out<-filter(t, GRCh37_chr==chrom[1], GRCh37_pos>=start[1], GRCh37_pos<=end[1]);
+                out<-dplyr::filter(t, GRCh37_chr==chrom[1], GRCh37_pos>=start[1], GRCh37_pos<=end[1]);
                 ind<-c(1, 2, 4, 6:ncol(out));
             } else {
-                out<-filter(t, GRCh38_chr==chrom[1], GRCh38_pos>=start[1], GRCh38_pos<=end[1]);
+                out<-dplyr::filter(t, GRCh38_chr==chrom[1], GRCh38_pos>=start[1], GRCh38_pos<=end[1]);
                 ind<-c(1, 3, 5, 6:ncol(out))
             }
             CollectGwasDbData(dplyr::select(out, ind), min.phred, analyses.out=analyses.out);
@@ -124,7 +124,7 @@ SnpPosFromGwasDb<-function(ids, tbl, correct.id=TRUE, as.GRanges=FALSE, genome=c
     }
    
     ###########################################################################
-    if (length(ids) > 1) t<-as.data.frame(collect(filter(tbl, id %in% ids))) else t<-as.data.frame(collect(filter(tbl, id==ids)));
+    if (length(ids) > 1) t<-as.data.frame(dplyr::collect(dplyr::filter(tbl, id %in% ids))) else t<-as.data.frame(dplyr::collect(dplyr::filter(tbl, id==ids)));
     
     if (genome[1] == 'GRCh37') t<-t[, c(1, 2, 4)] else t<-t[, c(1, 3, 5)];
 
@@ -184,7 +184,7 @@ CollectGwasDbData<-function(tbl, min.phred=0, analyses.out=NA) {
     if (nrow(tbl)==0 | ncol(tbl)==3) {
         data.frame(Chromosome=character(0), Position=integer(0), Phred=integer(0), SNP=character(0), Analysis=character(0));
     } else {
-        tbl<-as.data.frame(collect(tbl)); # collect query result and convert to a data.frame
+        tbl<-as.data.frame(dplyr::collect(tbl)); # collect query result and convert to a data.frame
 
         ana<-rep(colnames(tbl)[4:ncol(tbl)], each=nrow(tbl)); # Analysis ID
         snp<-rep(as.vector(tbl[[1]]), ncol(tbl)-3); # SNP ID
