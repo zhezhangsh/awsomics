@@ -142,7 +142,7 @@ shinyServer(function(input, output, session) {
   ######################################## "Search" tab #############################################
   # table title
   output$search.table.title<-renderUI({
-    if (input$search.value == '' | input$check.refresh) list(h1('Welcome to AWSOMICS: Meta-GWAS'), h6("beta version")) else 
+    if (input$search.value == '' | input$check.refresh) list(h1('Welcome to Awsomics: GWAS Hub'), h6("beta version")) else 
       h2(paste('Query: ', input$search.options, ' = ', input$search.value, sep=''));
   });
 

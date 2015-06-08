@@ -2,7 +2,7 @@ print("loading UI");
 
 print(system.time(source("/zhangz/awsomics/meta_gwas/preload.R")));
 
-shinyUI(navbarPage("Meta-GWAS", collapsible = TRUE, title='Meta-GWAS',
+shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
                    
             ############################################################################## 
             ################################ "Search" tab ################################ 
@@ -50,11 +50,7 @@ shinyUI(navbarPage("Meta-GWAS", collapsible = TRUE, title='Meta-GWAS',
             ################################# "Introduction" tab ################################# 
             # "Introduction" tab
             tab.home<-tabPanel("Introduction", id = 'tab.home',
-                  wellPanel(style = "background-color: #ffffff;",
-                            helpText(intro.paragraph), # introduction (defined in "element.R"),
-                            helpText(data.paragraph), # data (defined in "element.R")
-                            helpText(search.paragraph)
-                  )
+                  wellPanel(style = "background-color: #ffffff;", includeMarkdown('./intro.Rmd'))
             ),
             ############################################################################## 
             
