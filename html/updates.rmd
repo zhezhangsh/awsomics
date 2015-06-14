@@ -1,0 +1,6 @@
+
+### Updates
+
+- 2015-06-05: Meta-GWAS is renamed to GWAS Hub.
+- 2015-06-04: The first Awsomics APP, Meta-GWAS is live.
+
