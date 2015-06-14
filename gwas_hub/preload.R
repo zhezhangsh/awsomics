@@ -1,7 +1,7 @@
 # Pre-load data when this App is started
-AWSOMICS_HOME<-"/zhangz/awsomics/";
+AWSOMICS_HOME<-"/zhangz/awsomics_dev/gwas_hub";
 RCHIVE_HOME<-"/zhangz/rchive/";
-APP_HOME<-paste(AWSOMICS_HOME, "meta_gwas", sep='/');
+APP_HOME<-paste(AWSOMICS_HOME, "gwas_hub", sep='/');
 
 # subfolders
 GWAS_HOME<-paste(RCHIVE_HOME, '/data/gwas', sep=''); # Location of GWAS data

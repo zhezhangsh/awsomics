@@ -129,8 +129,8 @@ shinyServer(function(input, output, session) {
       fn<-paste(Sys.time(), '_chr', chr, '-', stt, '-', end, sep='');
       fn<-paste(fn, '_', search.opt, '=', original.search.key, '.rdata', sep='');
       fn<-gsub('[ :]', '-', fn);
-      rslt.path<-paste(APP_HOME, 'results', sep='/'); 
-      if (!file.exists(rslt.path)) dir.create(rslt.path);
+      rslt.path<-paste(APP_HOME, 'results', sep='/');
+      if (!file.exists(rslt.path)) dir.create(rslt.path); print(rslt.path); print(fn);
       save(rslt, file=paste(rslt.path, fn, sep='/'));
       #######################################################################
       
@@ -142,7 +142,7 @@ shinyServer(function(input, output, session) {
   ######################################## "Search" tab #############################################
   # table title
   output$search.table.title<-renderUI({
-    if (input$search.value == '' | input$check.refresh) list(h1('Welcome to AWSOMICS: Meta-GWAS'), h6("beta version")) else 
+    if (input$search.value == '' | input$check.refresh) list(h1('Welcome to AWSOMICS: GWAS Hub'), h6("beta version")) else 
       h2(paste('Query: ', input$search.options, ' = ', input$search.value, sep=''));
   });
 
@@ -301,7 +301,7 @@ shinyServer(function(input, output, session) {
   ######################################## "Enrichment" tab #########################################
   output$enrichment.table.title<-renderUI({
     rslt<-search.rslt();
-    if(identical(NA, rslt)) h3("Enrichment of keywords related to top hits (waiting for search results ...)") else h2(paste(input$search.options, input$search.value, sep=' = '))
+    if(identical(NA, rslt)) h3("Enrichment of keywords related to top hits") else h2(paste(input$search.options, input$search.value, sep=' = '))
   });  
   output$enrichment.table <- DT::renderDataTable({
    meta.gwas.enrichment(search.rslt(), input$enrich.minimum.phred, input$enrich.minimum.count, input$keyword.options, key.enrich);

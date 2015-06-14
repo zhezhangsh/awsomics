@@ -1,8 +1,8 @@
 print("loading UI");
 
-print(system.time(source("/zhangz/awsomics/meta_gwas/preload.R")));
+print(system.time(source("/zhangz/awsomics_dev/gwas_hub/gwas_hub/preload.R")));
 
-shinyUI(navbarPage("Meta-GWAS", collapsible = TRUE, title='Meta-GWAS',
+shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
                    
             ############################################################################## 
             ################################ "Search" tab ################################ 
