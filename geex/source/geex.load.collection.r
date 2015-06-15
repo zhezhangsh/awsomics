@@ -42,8 +42,12 @@ geex.load.collection<-function(coll.name, GEX_HOME) {
     }
     
     if (length(msg) == 0) msg<-paste('Data collection "', coll.name, '" has been successfully loaded.', sep='');
+
+    #####################################################################################
+    # Extra slots to be appended for fast access
+    out$extra<-list();
+ 
     out$message<-msg;
-    
     out;
   }
 }

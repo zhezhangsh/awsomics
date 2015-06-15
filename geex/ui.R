@@ -48,21 +48,54 @@ shinyUI(
 
     ####################
     navbarMenu(
-      "Visualization",
+      "Analysis",
       ####################
+      
+      ############################################################################## 
+      ############################# "Barplot" tab ###############################
+      tabPanel(
+        "Gene barplot", htmlOutput('bar.title'), htmlOutput('bar.message'),
+        fluidRow(
+          column(8, plotOutput('bar.plot', width='100%')),
+          column(4, wellPanel(
+            selectizeInput("bar.dataset", "Select a data set:", c(), width='100%'),
+            h5('Gene list:'),
+            DT::dataTableOutput('bar.table'))))   
+      ), # end of tabPanel     
+      
       
       ############################################################################## 
       ############################# "PCA" tab ###############################
       tabPanel(
-        "PCA", htmlOutput('pca.title'), htmlOutput('pca.message'),
-        plotOutput('pca.plot'),
-        
-        absolutePanel(
-          top = 60, right = 10, width=360, draggable = TRUE, style = "opacity: 1", wellPanel(
-            selectizeInput("pca.dataset", "Select a data set:", c(), width='100%'),
-            checkboxGroupInput("pca.group", "", c()))
-        )       
-      ) # end of tabPanel                   
+        "Principal components analysis", htmlOutput('pca.title'), htmlOutput('pca.message'),
+        fluidRow(
+            column(8, plotOutput('pca.plot', width='100%')),
+            column(4, wellPanel(
+              selectizeInput("pca.dataset", "Select a data set:", c(), width='100%'),
+              h5('Sample list:'),
+              DT::dataTableOutput('pca.table'))))   
+      ), # end of tabPanel     
+      
+      ############################################################################## 
+      ############################# "Scatter" tab ###############################
+      tabPanel(
+        "Compare sample groups", htmlOutput('scatter.title'), htmlOutput('scatter.message'),
+        fluidRow(
+          column(8, fluidRow(
+            column(6, wellPanel(
+              h3('X-axis'),
+              selectizeInput("x.dataset", "Data set", c(), width='100%'),
+              selectizeInput("x.group", "Sample group", c(), width='100%'))),
+            column(6, wellPanel(
+              h3('Y-axis'),
+              selectizeInput("y.dataset", "Data set", c(), width='100%'),
+              selectizeInput("y.group", "Sample group", c(), width='100%'))),
+            column(12, plotOutput('scatter.plot', width='100%'))
+            )),
+          column(4, wellPanel(
+            checkboxInput('scatter.show.gene', 'Show genes', FALSE),
+            DT::dataTableOutput('scatter.table'))))
+      ) # end of tabPanel     
     ) # end of navbarMenu
   ) # end of navbarPage
 ) # end of shinyUI

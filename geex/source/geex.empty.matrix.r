@@ -1,0 +1,1 @@
+geex.empty.matrix<-function(cnm) matrix('', nr=1, nc=01, dimnames=list('', cnm));
