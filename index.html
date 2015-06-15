@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Welcome to Awsomics!</title>
+  <style type="text/css">
+    body, html {
+      font-family: Helvetica, Arial, sans-serif;
+      background-color: #F5F5F5;
+      color: #114;
+      margin: 0;
+      padding: 0;
+    }
+    a {
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    #titleBar {
+      height: 80px;
+      background-color: #3475b4;
+      overflow: hidden;
+      border-bottom: 1px solid #3475b3;
+      -moz-box-shadow:    0px 0px 10px 3px #BBC;
+      -webkit-box-shadow: 0px 0px 10px 3px #BBC;
+      box-shadow:         0px 0px 10px 3px #BBC;
+    }
+    #titleBar #container {
+      margin-top: 14px;
+    }
+    #titleBar h1 {
+      margin: 0 auto .5em auto;
+      padding: .2em;
+      color: #EEE;
+      text-align: center;
+    }
+    #intro {
+      background-color: #DDD;
+      margin: 1em 1em 0 1em;
+      padding: .75em;
+      text-align: center;
+      border: 1px solid #CCC;
+      font-size: 18px;
+    }
+    #intro p {
+      margin: .3em 0 .3em 0;
+    }
+    #outer-content {
+      max-width: 910px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #content {
+      margin: 1em auto 1em auto;
+      float: left;
+    }
+    #main{
+      margin-right: 350px;
+      margin-left: -100px;
+      float: left;
+      line-height: 24px;
+    }
+
+    #shiny{
+      float: left;
+      width: 305px;
+      margin-left: -330px;
+      padding-left: 20px;
+      border-left: 1px solid #AAA;
+    }
+    #shiny iframe {
+      margin-top: 30px;
+    }
+    .caption{
+      font-size: 13px;
+    }
+    code {
+      background-color: #E5E5E5;
+      border: 1px solid #AAA;
+      -webkit-border-radius: 3px;
+      -khtml-border-radius: 3px; 
+      -moz-border-radius: 3px;
+      border-radius: 3px;
+      padding: 0 .5em 0 .5em;
+    }
+  </style>
+</head>
+<body>
+  <div id="titleBar">
+    <div id="container">
+      <h1>Welcome to Awsomics toolbox!</h1>
+    </div>
+  </div>
+  <div id="outer-content">   
+    <div id="content">
+      <div id="main">
+        <h2>What's Awsomics?</h2>
+        <p></p>Awsomics is an online <strong>toolbox</strong> that supports <strong>exploratory analysis</strong> of complex genomic data and facilitates <strong>knowledge discovery</strong> in the process of biomedical research. It is currently available as a <a href="http://www.rstudio.com/products/shiny/shiny-server/">Shiny Web Server</a> running on <a href="http://aws.amazon.com">Amazon Web Service</a> (<strong>AWS</strong>), a cloud platform. Awsomics has three major components: 
+        <ul>
+        <li><strong>Rchive</strong>, the backend collection of currated genomic data; </li>
+        <li>a <strong>Shiny web server</strong> that hosts a series of bioinformatics tools, or APPs; </li>
+        <li>and <strong>bioinformatics methods</strong> implemented by the APPs to enable integrative analysis of multiple data sets and data types.</li>
+        </ul>
+        </p>
+        
+        <img src="./image/awsomics.png">
+        <figcaption></figcaption>
+        
+        <br />
+        <h3>Contact:</h3>
+        Jim Zhe Zhang
+        <br />zhangz@email.chop.edu
+        <br />Department of Biomedical and Health Informatics
+        <br />The Children's Hospital of Philadelphia
+
+    </div>
+    <div id="shiny">
+        <div class='panel' style="border: 1px solid #AAA; width: 320px; height: 400px; padding: 10px">
+          <h2>APPs</h2>
+          
+          <a href="http://awsomics.com/meta_gwas"><font color='green'>* GWAS Hub, beta version</font></a><br /> 
+            - <small>Search and summarize results of GWAS analyses.</small><br /> <br /> 
+
+          <font color='grey'>GeEx, demo version</font><br />
+            - <small><strong>G</strong>ene <strong>e</strong>xpression <strong>Ex</strong>plorer</small> <br /> 
+            - <small>Explore collections of transcriptome data sets.</small> <br /> 
+            
+            
+          <br /><br /><br /><font color='green'>* = running</font>
+          
+        </div>
+        <br />
+        <div class='panel' style="border: 1px solid #AAA; width: 320px; height: 400px; padding: 10px">
+          <h2>Updates</h2>
+          <small> - <strong>2015-06-05</strong>: Meta-GWAS is renamed to GWAS Hub. </small><br />
+          <small> - <strong>2015-06-04</strong>: The first Awsomics APP, Meta-GWAS is online.</small> <br />
+          </li>
+        </div>
+      </div>
+  </div>
+  
+</body>
+</html>
