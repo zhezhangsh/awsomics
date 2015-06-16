@@ -13,9 +13,10 @@ shinyServer(function(input, output, session) {
       
       longname<-as.vector(coll.loaded$mapping$id2longname[rownames(coll.loaded$metadata$Dataset)]);
       updateSelectInput(session, 'pca.dataset', choices=longname);
+      updateSelectInput(session, 'bar.dataset', choices=longname);
       updateSelectInput(session, 'x.dataset', choices=longname);
       updateSelectInput(session, 'y.dataset', choices=longname);
-      
+            
       coll.loaded;
     }   
   });
@@ -76,7 +77,7 @@ shinyServer(function(input, output, session) {
   
   output$pca.plot <- renderPlot({
     geex.plot.pca(load.coll(), input$pca.dataset, input$pca.table_rows_selected);
-  }, height = 480, width = 640);
+  }, height = 600, width = 800);
   
   output$pca.table <- DT::renderDataTable({
     cll<-load.coll();
@@ -96,9 +97,8 @@ shinyServer(function(input, output, session) {
     ch.y<-geex.longname.set2groups(load.coll(), input$y.dataset);
     updateSelectizeInput(session, 'y.group', choices=ch.y, selected=ch.y[length(ch.y)]);
   })
-
   
-  output$scatter.title<-renderUI({h2("Compare gene expression level") });
+  output$scatter.title<-renderUI({h2("Compare sample groups") });
   
   output$scatter.message<-renderUI({
     if (identical(NA, load.coll())) list(h3(msg.noload), br(), br()) else 
@@ -111,6 +111,39 @@ shinyServer(function(input, output, session) {
   
   output$scatter.plot <- renderPlot({
     geex.plot.scatter(load.coll(), input$x.group, input$y.group, input$scatter.table_rows_selected);  
-  }, height = 640, width = 640);
+  }, height = 800, width = 800);
+  
+  ########################################################################################
+  ######################################## "Bar Plot" tab ################################
+  load.dataset<-reactive({ 
+    ds<-geex.load.dataset(load.coll(), input$bar.dataset);
+    
+    if (!identical(NA, ds)) {
+      updateCheckboxGroupInput(session, 'bar.group', "Include groups:", choices=names(ds$group), selected=names(ds$group));
+      #updateSelectizeInput(session, 'bar.scale', "Scale", choices=names(ds$data));      
+    }
+    
+    ds;
+  })
+  
+  output$bar.title<-renderUI({h2("Gene expression level") });
+  
+  output$bar.message<-renderUI({
+    if (identical(NA, load.coll())) list(h3(msg.noload), br(), br()) else {
+      gn<-input$bar.table_rows_selected;
+      gn<-gn[gn %in% rownames(load.dataset()$anno)];
+      gn<-cll$gene[gn, 'Symbol'];
+      if (length(gn) == 0) list(h3("No gene selected"), br(), br()) else list(h3(HTML(paste("Gene", geex.html.msg(paste(gn, collapse=' / '))))), br(), br())
+    }
+  });
+  
+  output$bar.table <- DT::renderDataTable({
+    if (input$bar.dataset != '') load.dataset()$anno else geex.empty.matrix('Empty table');
+  }, options = list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 8), server=TRUE, escape = FALSE);
+  
+  output$bar.plot <- renderPlot({
+    rid<-input$bar.table_rows_selected;
+    geex.plot.bar(load.dataset(), rid, input$bar.scale, input$bar.group, input$bar.mean);  
+  });
 })
 

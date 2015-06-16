@@ -4,7 +4,6 @@
 
 
 print("loading UI");
-
 print(system.time(source("/zhangz/awsomics_dev/geex/geex/preload.R")));
 
 shinyUI(
@@ -50,26 +49,14 @@ shinyUI(
     navbarMenu(
       "Analysis",
       ####################
-      
-      ############################################################################## 
-      ############################# "Barplot" tab ###############################
-      tabPanel(
-        "Gene barplot", htmlOutput('bar.title'), htmlOutput('bar.message'),
-        fluidRow(
-          column(8, plotOutput('bar.plot', width='100%')),
-          column(4, wellPanel(
-            selectizeInput("bar.dataset", "Select a data set:", c(), width='100%'),
-            h5('Gene list:'),
-            DT::dataTableOutput('bar.table'))))   
-      ), # end of tabPanel     
-      
+
       
       ############################################################################## 
       ############################# "PCA" tab ###############################
       tabPanel(
         "Principal components analysis", htmlOutput('pca.title'), htmlOutput('pca.message'),
         fluidRow(
-            column(8, plotOutput('pca.plot', width='100%')),
+            column(8, plotOutput('pca.plot', width='100%', height='100%')),
             column(4, wellPanel(
               selectizeInput("pca.dataset", "Select a data set:", c(), width='100%'),
               h5('Sample list:'),
@@ -95,7 +82,24 @@ shinyUI(
           column(4, wellPanel(
             checkboxInput('scatter.show.gene', 'Show genes', FALSE),
             DT::dataTableOutput('scatter.table'))))
+      ), # end of tabPanel    
+      
+      ############################################################################## 
+      ############################# "Barplot" tab ###############################
+      tabPanel(
+        "Gene expression level", htmlOutput('bar.title'), htmlOutput('bar.message'),
+        fluidRow(
+          column(6, plotOutput('bar.plot', width='100%')),
+          column(3, 
+                 wellPanel(
+                   selectizeInput("bar.scale", "Scale", c('logged', 'unlogged', 'percentile'), width='100%'),
+                   checkboxInput("bar.mean", "Show group mean")),
+                 wellPanel(
+                   selectizeInput("bar.dataset", "Select a data set:", c(), width='100%'),
+                   checkboxGroupInput("bar.group", label='', choices=c()))),
+          column(3, wellPanel(DT::dataTableOutput('bar.table'))))       
       ) # end of tabPanel     
+      
     ) # end of navbarMenu
   ) # end of navbarPage
 ) # end of shinyUI

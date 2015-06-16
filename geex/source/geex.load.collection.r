@@ -1,3 +1,24 @@
+geex.load.dataset<-function(cll, ds.longname) {
+  if (identical(cll, NA)) NA else {
+    smp<-cll$metadata$Sample;
+    ds<-cll$metadata$Dataset;
+    ds.id<-cll$mapping$longname2id[ds.longname];
+    ds.id<-as.vector(ds.id[ds.id %in% rownames(ds)][1]);
+    
+    if (length(ds.id) == 0) NA else {
+      s<-smp[smp$Dataset==ds.id, ];
+      e<-lapply(cll$gex_combined, function(g) g[, rownames(s), drop=FALSE]);
+      e<-lapply(e, function(e) e[!is.na(rowMeans(e)), , drop=FALSE]);
+      anno<-cll$gene[rownames(e[[1]]), 'Symbol', drop=FALSE];
+      
+      group<-split(rownames(s), s$Group);
+      names(group)<-cll$mapping$id2longname[names(group)];
+      
+      list(anno=anno, group=group, data=e);
+    }
+  } 
+}
+
 geex.load.collection<-function(coll.name, GEX_HOME) {
   
   # Files to be loaded
