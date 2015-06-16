@@ -132,7 +132,7 @@ shinyServer(function(input, output, session) {
     if (identical(NA, load.coll())) list(h3(msg.noload), br(), br()) else {
       gn<-input$bar.table_rows_selected;
       gn<-gn[gn %in% rownames(load.dataset()$anno)];
-      gn<-cll$gene[gn, 'Symbol'];
+      gn<-load.dataset()$gene[gn, 'Symbol'];
       if (length(gn) == 0) list(h3("No gene selected"), br(), br()) else list(h3(HTML(paste("Gene", geex.html.msg(paste(gn, collapse=' / '))))), br(), br())
     }
   });
