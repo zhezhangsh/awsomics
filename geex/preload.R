@@ -1,6 +1,6 @@
 # Pre-load data when this App is started
 AWSOMICS_HOME<-"/zhangz/awsomics_dev/geex";
-RCHIVE_HOME<-"/zhangz/rchive/";
+RCHIVE_HOME<-"/zhangz/rchive";
 APP_HOME<-paste(AWSOMICS_HOME, "geex", sep='/');
 
 # subfolders
