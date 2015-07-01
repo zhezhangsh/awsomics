@@ -1,0 +1,20 @@
+
+Listening on http://127.0.0.1:55255
+
+Attaching package: ‘dplyr’
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Error in func() : could not find function "meta.gwas.plot.qq"
+Error in exprFunc() : 
+  could not find function "meta.gwas.summarize.results"
+Error in exprFunc() : could not find function "meta.gwas.enrichment"
+Error in func() : could not find function "meta.gwas.plot.qq"
+
+Execution halted

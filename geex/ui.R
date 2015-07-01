@@ -4,7 +4,7 @@
 
 
 print("loading UI");
-print(system.time(source("/zhangz/awsomics_dev/geex/geex/preload.R")));
+print(system.time(source("/zhangz/awsomics/geex/preload.R")));
 
 shinyUI(
   navbarPage(
@@ -30,7 +30,10 @@ shinyUI(
     # "Introduction" tab
     tab.home<-tabPanel(
       "Introduction", id = 'tab.home',
-      wellPanel(style = "background-color: #ffffff;", helpText("Introduction"))
+      wellPanel(style = "background-color: #ffffff;", 
+                helpText(h2("Introduction")),
+                helpText("This is a demo of GeEx, Gene expression Explorer"),
+                helpText("GeEx provides access, analysis, and visualization of collections of transcriptome data sets, and functions to "))
     ),
     
     ############################################################################## 
@@ -49,57 +52,107 @@ shinyUI(
     navbarMenu(
       "Analysis",
       ####################
-
-      
-      ############################################################################## 
+   
+      #######################################################################
       ############################# "PCA" tab ###############################
       tabPanel(
-        "Principal components analysis", htmlOutput('pca.title'), htmlOutput('pca.message'),
+        "Principal components analysis", htmlOutput('pca.title'), hr(),
         fluidRow(
-            column(8, plotOutput('pca.plot', width='100%', height='100%')),
+            column(8, 
+                   fluidRow(
+                     column(4, wellPanel(
+                       h5("Select principal components"),
+                       column(6, selectizeInput("pca.x", NULL, c())),
+                       column(6, selectizeInput("pca.y", NULL, c())),
+                       h5("Select colors"),
+                       selectizeInput("pca.color", NULL, GetColorTypes()))),
+                     column(4, wellPanel(selectizeInput("pca.dataset", "Select data set", c(), width='100%'))),
+                     column(4, wellPanel(checkboxGroupInput("pca.group", label='Select group(s)', choices=c())))),
+                   hr(),
+                   htmlOutput('pca.message'),
+                   plotOutput('pca.plot')),
             column(4, wellPanel(
-              selectizeInput("pca.dataset", "Select a data set:", c(), width='100%'),
-              h5('Sample list:'),
+              h5('Select sample(s) to highlight'),
               DT::dataTableOutput('pca.table'))))   
       ), # end of tabPanel     
       
-      ############################################################################## 
-      ############################# "Scatter" tab ###############################
-      tabPanel(
-        "Compare sample groups", htmlOutput('scatter.title'), htmlOutput('scatter.message'),
-        fluidRow(
-          column(8, fluidRow(
-            column(6, wellPanel(
-              h3('X-axis'),
-              selectizeInput("x.dataset", "Data set", c(), width='100%'),
-              selectizeInput("x.group", "Sample group", c(), width='100%'))),
-            column(6, wellPanel(
-              h3('Y-axis'),
-              selectizeInput("y.dataset", "Data set", c(), width='100%'),
-              selectizeInput("y.group", "Sample group", c(), width='100%'))),
-            column(12, plotOutput('scatter.plot', width='100%'))
-            )),
-          column(4, wellPanel(
-            checkboxInput('scatter.show.gene', 'Show genes', FALSE),
-            DT::dataTableOutput('scatter.table'))))
-      ), # end of tabPanel    
-      
+
       ############################################################################## 
       ############################# "Barplot" tab ###############################
       tabPanel(
-        "Gene expression level", htmlOutput('bar.title'), htmlOutput('bar.message'),
+        "Single gene expression", htmlOutput('bar.title'), hr(),
         fluidRow(
-          column(6, plotOutput('bar.plot', width='100%')),
-          column(3, 
+          column(8, 
+                 fluidRow(
+                   column(4, wellPanel(
+                     selectizeInput("bar.scale", "Select data scale", c('logged', 'unlogged', 'percentile')),
+                     selectizeInput("bar.color", "Select colors", GetColorTypes()))),
+                   column(4, wellPanel(
+                     selectizeInput("bar.dataset", "Select data set", c(), width='100%'))),
+                   column(4, wellPanel(
+                     checkboxGroupInput("bar.group", label='Select group(s)', choices=c()), div(), 
+                     checkboxInput("bar.mean", HTML(geex.html.msg("Plot group mean")))))),
+                 hr(),
+                 htmlOutput('bar.message'),
+                 plotOutput('bar.plot', width='100%')),
+          column(4, 
                  wellPanel(
-                   selectizeInput("bar.scale", "Scale", c('logged', 'unlogged', 'percentile'), width='100%'),
-                   checkboxInput("bar.mean", "Show group mean")),
+                   h3('Select gene(s)'),
+                   checkboxInput("bar.selected", HTML(geex.html.msg("Show selected only"))),
+                   DT::dataTableOutput('bar.table'), 
+                   actionButton("bar.clear", 'Clear selection')), 
                  wellPanel(
-                   selectizeInput("bar.dataset", "Select a data set:", c(), width='100%'),
-                   checkboxGroupInput("bar.group", label='', choices=c()))),
-          column(3, wellPanel(DT::dataTableOutput('bar.table'))))       
-      ) # end of tabPanel     
+                   h4('Look up gene:'),
+                   fluidRow(
+                     column(6, 
+                            textInput("lookup.key", "", ''),
+                            selectizeInput("lookup.species", '', choices=c())),
+                     column(6, DT::dataTableOutput('lookup.table')))))
+                   
+                   
+          )), # end of tabPanel     
       
+      ############################################################################## 
+      ############################# "Compare" tab ###############################
+      tabPanel(
+        "2-group differential expression", htmlOutput('two.title'), hr(),
+        fluidRow(
+          column(8, fluidRow(
+            column(4, wellPanel(
+              selectizeInput("two.type", "Select plot type", PlotPairDiffType()),
+              selectizeInput("two.scale", "Select data scale", c('logged', 'unlogged', 'percentile')),
+              selectizeInput("two.select.species", "Select species", c()))),
+            column(4, wellPanel(
+              h4('X-axis'),
+              selectizeInput("x.dataset", "Data set", c(), width='100%'),
+              selectizeInput("x.group", "Sample group", c(), width='100%'))),
+            column(4, wellPanel(
+              h4('Y-axis'),
+              selectizeInput("y.dataset", "Data set", c(), width='100%'),
+              selectizeInput("y.group", "Sample group", c(), width='100%')))),
+            hr(),
+            htmlOutput('two.message'),
+            plotOutput('two.plot', width='100%')),
+          column(4,
+                 wellPanel(
+                   h4('Highlight gene(s)'),
+                   DT::dataTableOutput('two.table', width='100%'), 
+                   actionButton("two.clear", 'Clear selection')), 
+                 wellPanel(
+                   h4('Highlight gene set(s)'),
+                   column(3, h5("Source:")), 
+                   column(8, selectizeInput("two.source", NULL, names(geneset), selected=names(geneset)[1], options=list('caption-side'='bottom'))),
+                   column(3, h5("Collection:")), 
+                   column(8, selectizeInput("two.coll", NULL, names(geneset[[1]]), selected=names(geneset[[1]])[1])),
+                   column(3, h5("Species:")), 
+                   column(8, selectizeInput("two.species", NULL, names(geneset[[1]][[1]]), selected=names(geneset[[1]][[1]])[1])),
+                   DT::dataTableOutput('two.table.geneset', width='100%'), 
+                   actionButton("two.clear.geneset", 'Clear selection'))))
+      ) # end of tabPanel    
+      
+      #############################################################################################################################
+      #############################################################################################################################
+            
     ) # end of navbarMenu
   ) # end of navbarPage
 ) # end of shinyUI

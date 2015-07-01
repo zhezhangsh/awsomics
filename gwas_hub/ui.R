@@ -1,6 +1,6 @@
 print("loading UI");
 
-print(system.time(source("/zhangz/awsomics/meta_gwas/preload.R")));
+print(system.time(source("/zhangz/awsomics/gwas_hub/preload.R")));
 
 shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
                    

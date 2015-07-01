@@ -1,11 +1,14 @@
 # Pre-load data when this App is started
-AWSOMICS_HOME<-"/zhangz/awsomics_dev/geex";
+AWSOMICS_HOME<-"/zhangz/awsomics";
 RCHIVE_HOME<-"/zhangz/rchive";
 APP_HOME<-paste(AWSOMICS_HOME, "geex", sep='/');
 
 # subfolders
 GENE_HOME<-paste(RCHIVE_HOME, '/data/gene/public/entrez/r', sep=''); # Location of gene annotation data
+GENESET_HOME<-paste(RCHIVE_HOME, '/data/gene.set/r', sep=''); # Location of gene annotation data
 GEX_HOME<-paste(RCHIVE_HOME, '/data/gex', sep=''); # Gene expression data collections
+
+library(rchive);
 
 # load source code 
 src<-paste(AWSOMICS_HOME, '/R/', dir(paste(AWSOMICS_HOME, '/R/', sep="")), sep='');
@@ -22,6 +25,19 @@ coll<-readRDS(paste(GEX_HOME, 'r/collection.rds', sep='/'));
 select.collection<-paste(rownames(coll), coll$Name, sep=': ');
 
 ##########################################################################################################
-# Message text
-msg.noload<-'No loaded data collection'
+# load gene set metadata
+geneset<-readRDS(paste(GENESET_HOME, 'metadata_as_tree.rds', sep='/'));
 
+##########################################################################################################
+# Message text
+msg.nocollection<-'No loaded data collection';
+msg.nodataset<-'No selected data set';
+msg.nogroup<-'No selected group';
+msg.nogene<-'No selected gene';
+
+##########################################################################################################
+# datatable options
+dt.options1<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25);
+dt.options2<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 6, pagingType = 'simple', sScrollX = '100%', lengthChange = FALSE);
+dt.options3<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 10, pagingType = 'simple', lengthChange = FALSE);
+dt.options4<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5, searching=FALSE,  pagingType = 'simple', lengthChange = FALSE);

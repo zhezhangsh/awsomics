@@ -43,6 +43,11 @@ UrlUcscPosition<-function(chr, from, to=from, min.ws=100, genome='hg38') {
     url
 }
 
+# Make URL to NCBI gene
+UrlEntrezGene<-function(ids) {
+  paste("http://www.ncbi.nlm.nih.gov/gene/?term=", ids, sep='');
+}
+
 ##########################################################################################################################################################
 # Make URLs to dbSNP with dbSNP IDs
 UrlDbsnpId<-function(ids) {

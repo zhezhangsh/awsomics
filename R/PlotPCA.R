@@ -78,12 +78,11 @@ PlotPCA<-function(pca, groups, highlight=NA, filename=NA, dimensions=1:2, legend
   par(mai=c(1,1,.25,.25));
     
   plot(X, Y, col=col, pch=pch, cex=cex, xlim=c(min(X)*1.1, max(X)*1.1), ylim=c(min(Y)*1.1, max(Y)*1.1), 
-       xlab=paste('PC', dimensions[1], ', ', per[1], '%', sep=''), ylab=paste('PC', dimensions[2], ', ', 
-                                                                              per[2], '%', sep=''), cex.lab=2.5);
+       xlab=paste('PC', dimensions[1], ', ', per[1], '%', sep=''), ylab=paste('PC', dimensions[2], ', ', per[2], '%', sep=''), cex.lab=2.5);
   
   # Print highlight samples
   highlight<-highlight[highlight %in% names(X)];
-  if (length(highlight) > 0) points(X[highlight], Y[highlight], cex=1.33*cex);
+  if (length(highlight) > 0) points(X[highlight], Y[highlight], cex=1.5*cex, pch=13, lwd=2);
   
   if (propagation) {
     AddAPCluster(cbind(X,Y), cex);
@@ -121,7 +120,7 @@ PlotPCA2Groups<-function(pca, ind1, ind2, label.samples=FALSE, filename=NA, grou
   # dimensions	The 2 dimensions of PCA outputs to be used
   # col,pch,cex	Plot parameters
   # new.window    If TRUE, plot the PCA result in a new Quartz
-  
+
   ind<-c(ind1, ind2);
   X<-pca$x[ind, dimensions[1]];
   Y<-pca$x[ind, dimensions[2]];
@@ -139,15 +138,12 @@ PlotPCA2Groups<-function(pca, ind1, ind2, label.samples=FALSE, filename=NA, grou
   if (!identical(NA, filename)) {
     if (gregexpr('pdf$', filename, ignore.case=TRUE)==-1) filename=paste(filename, '.pdf', sep='');
     pdf(filename, w=w, h=h) # write to pdf file
-  }
-  else if (new.window) quartz(w=w, h=h);
+  }  else if (new.window) quartz(w=w, h=h);
   layout(matrix(1:2, nrow=1), width=c(3,1));
   par(mai=c(1,1,.25,.25));
   
-  
   plot(X, Y, col=col, pch=pch, cex=cex, xlim=c(min(X)*1.1, max(X)*1.1), ylim=c(min(Y)*1.1, max(Y)*1.1), 
-       xlab=paste('PC', dimensions[1], ', ', per[1], '%', sep=''), ylab=paste('PC', dimensions[2], ', ', 
-                                                                              per[2], '%', sep=''), cex.lab=2.5);
+       xlab=paste('PC', dimensions[1], ', ', per[1], '%', sep=''), ylab=paste('PC', dimensions[2], ', ', per[2], '%', sep=''), cex.lab=2.5);
   
   if (propagation) {
     AddAPCluster(cbind(X,Y), cex);
