@@ -12,7 +12,7 @@ geex.load.dataset<-function(cll, ds.longname) {
       e<-lapply(e, function(e) e[!is.na(rowMeans(e)), , drop=FALSE]);
       anno<-cll$gene[rownames(e[[1]]), ,drop=FALSE];
       id<-rownames(anno);
-      anno<-data.frame(ID=AddHref(id, UrlEntrezGene(id)), Name=anno$Symbol, Species=anno$Species, NSet=cll$gene[id, 'Num_Dataset'], row.names=rownames(anno), stringsAsFactors=FALSE);
+      anno<-data.frame(ID=AddHref(id, UrlEntrezGene(id)), Name=anno$Symbol, Species=anno$Species, N_Set=cll$gene[id, 'Num_Dataset'], row.names=rownames(anno), stringsAsFactors=FALSE);
       
       group<-split(rownames(s), s$Group);
       names(group)<-cll$mapping$id2longname[names(group)];

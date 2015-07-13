@@ -1,11 +1,12 @@
 # make barplot of a single gene
 
-geex.plot.bar<-function(ds, rid, selected, scale, color, selected.group, show.mean=FALSE) {
+geex.plot.bar<-function(ds, rid, selected, scale, color, selected.group, show.mean=FALSE) { 
   # make an empty plot
   plotEmpty<-function(msg) plot(0, xaxt='n', yaxt='n', type='n', xlab='', ylab='', axes=FALSE, main=msg); 
 
   if (identical(NA, ds)) plotEmpty("No selected data set.") else if (length(selected.group)==0) plotEmpty("No selected group.") else 
-    if (length(rid)==0 & selected) plotEmpty('') else if (length(rid)==0) plotEmpty("No selected gene.") else {
+    if (length(rid)==0 & selected) plotEmpty('') else if (length(rid)==0) plotEmpty("No selected gene.") else 
+      if (show.mean & length(selected.group)<2) plotEmpty("Need more than 1 group to plot group means") else {
 
     if (scale=='unlogged') d<-exp(ds$data$logged*log(2)) else d<-ds$data[[scale]];
 
@@ -36,7 +37,6 @@ geex.plot.bar<-function(ds, rid, selected, scale, color, selected.group, show.me
           } else {
             m<-sapply(rid, function(rid) sapply(grp, function(s) mean(d[rid, s])));
             se<-sapply(rid, function(rid) sapply(grp, function(s) sd(d[rid, s])/sqrt(length(s))));
-            #se[is.na(se)]<-0;
             u<-m+se;
             l<-m-se;
             col<-rep(col0[rownames(m)], each=length(rid));

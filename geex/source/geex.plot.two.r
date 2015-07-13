@@ -1,11 +1,13 @@
-geex.plot.two<-function(cll, xgrp, ygrp, type, scale, species, gn, gs) {
-  cat('\n', xgrp, ygrp, scale, type, species, gn, names(gs), '\n');
+geex.plot.two<-function(cll, xgrp, ygrp, type, scale, color, species, gn, gs) { 
   
   # make an empty plot
   plotEmpty<-function(msg) plot(0, xaxt='n', yaxt='n', type='n', xlab='', ylab='', main=msg);   
   
-  gn<-CleanHtmlTags(gn);
-  names(gs)<-CleanHtmlTags(gs);
+  out<-list();
+  
+  gn<-CleanHtmlTags(gn);  
+  scale<-tolower(scale);
+  type<-tolower(type);
   
   if (identical(NA, cll)) {
     plotEmpty("No loaded data collection");
@@ -15,36 +17,51 @@ geex.plot.two<-function(cll, xgrp, ygrp, type, scale, species, gn, gs) {
     plotEmpty("Group 2 not selected");
   } else {
     d<-geex.get2group(cll, xgrp, ygrp, species[1])[, 3:4, drop=FALSE];
-    PlotPairDiff(d, type, gs, gn);
-  }
-   
-#     dff<-d[,3]-d[,2];
-#     corr<-round(cor(d[,2], d[,3]), 4);
-#     
-#     main<-paste('Corr = ', corr, ', N = ', nrow(d), sep='');
-#     par(mar=c(5,5,2,2));
-#     plot(d[, 2], d[, 3], pch=19, cex=1, main=main, cex.main=1.5, col='#88888888', xlab=xgrp, ylab=ygrp, cex.lab=1.5);
-}
-
-# make scatterplot of group means
-geex.plot.scatter<-function(cll, xgrp, ygrp, highlight=NA) {
- 
-  if (identical(NA, cll) | xgrp=='' | ygrp=='') plotEmpty() else {
-    d<-geex.get2group(cll, xgrp, ygrp);
-    corr<-round(cor(d[,2], d[,3]), 4);    
-    main<-paste('Corr = ', corr, ', N = ', nrow(d), sep='');
-    par(mar=c(5,5,2,2));
-    plot(d[, 2], d[, 3], pch=19, cex=1, main=main, cex.main=1.5, col='#88888888', xlab=xgrp, ylab=ygrp, cex.lab=1.5);
-    
-    # Plot highlight genes
-    highlight<-highlight[highlight %in% rownames(d)];
-    if (length(highlight) > 0) {
-      points(d[highlight, 2], d[highlight, 3], pch=19, cex=1.25, col='#0000FF');
-      points(d[highlight, 2], d[highlight, 3], cex=2, col='black');      
+    d<-d[!is.na(d[,1]) & !is.na(d[,2]), ,drop=FALSE];
+    if (nrow(d) < 3) plotEmpty("Not enough data (N<3) to plot") else {
+      if(scale=='unlogged') d<-exp(geex.get2group(cll, xgrp, ygrp, species[1])[, 3:4, drop=FALSE]*log(2)) else d<-geex.get2group(cll, xgrp, ygrp, species[1], scale)[, 3:4, drop=FALSE]
+      
+      dff<-d[,2]-d[,1];
+      names(dff)<-rownames(d);
+      dff<-dff[!is.na(dff)];
+      
+      if (length(gn) > 0) gn<-gn[gn %in% names(dff)];
+      if (length(gs) > 0) gs<-lapply(gs, function(g) g[g %in% names(dff)]);
+      
+      ######################################################
+      plotted<-PlotPairDiff(d, type, color, gs, gn); #######
+      ######################################################
+      
+      ######################################################
+      #Summarize gene sets
+      if (length(gs) > 0) {     
+        bg<-dff[!(names(dff) %in% unlist(gs, use.names=FALSE))];
+        
+        nm<-c(names(gs), 'All other genes');
+        n<-c(sapply(gs, length), length(bg));
+        m<-format(c(sapply(gs, function(g) if (length(g)>0) mean(dff[g], na.rm=TRUE) else NA), mean(bg)), digit=4);
+        md<-format(c(sapply(gs, function(g) if (length(g)>0) median(dff[g], na.rm=TRUE) else NA), median(bg)), digit=4);
+        pt<-c(format(sapply(gs, function(g) if (length(g)>1 & length(bg)>1) t.test(dff[g], bg)$p.value[[1]] else NA), digit=2, scientific=TRUE), '');
+        pr<-c(format(sapply(gs, function(g) if (length(g)>1 & length(bg)>1) wilcox.test(dff[g], bg)$p.value[[1]] else NA), digit=2, scientific=TRUE), '');
+        
+        col<-plotted$highlight.color; 
+        col<-col[names(col) %in% nm];
+        if (length(col) > 0) {
+          c<-rep('black', length(nm));
+          names(c)<-nm;
+          c[names(col)]<-col;
+          nm<-paste('<font color="', c, '">', nm, '</font>', sep='');
+        }
+        
+        out$geneset.stat<-data.frame(Name=nm, N=n, Mean=m, Median=md, pValueT=pt, pValueRST=pr, stringsAsFactors=FALSE);
+      }
+      ######################################################     
     }
   }
+  out;
 }
 
+# decide species based on the two data groups to be compared. 'human' if both originally human or different spcies, or the other species if both the same non-human species
 geex.get2group.species<-function(cll, xgrp, ygrp) { 
 
   if (identical(NA, cll) | xgrp=='' | ygrp=='') c() else {
@@ -66,7 +83,7 @@ geex.get2group.species<-function(cll, xgrp, ygrp) {
 }
 
 # Get 2 groups of data for plot
-geex.get2group<-function(cll, xgrp, ygrp, sp) { 
+geex.get2group<-function(cll, xgrp, ygrp, sp, scale='logged') { 
   if (identical(NA, cll)  | xgrp=='' | ygrp=='') {
     matrix('', nr=1, nc=01, dimnames=list('', 'Empty table'));
   } else { 
@@ -80,7 +97,7 @@ geex.get2group<-function(cll, xgrp, ygrp, sp) {
     xds<-as.vector(meta$Group[xid, 'Dataset']);
     yds<-as.vector(meta$Group[yid, 'Dataset']);
 
-    gex<-cll$gex_combined$logged[, c(xid, yid), drop=FALSE];
+    gex<-cll$gex_combined[[scale]][, c(xid, yid), drop=FALSE];
     gex<-gex[!is.na(gex[,1]) & !is.na(gex[,2]), , drop=FALSE];
         
     gn<-cll$gene[, c('Species', 'Symbol'), drop=FALSE]; 
@@ -103,5 +120,26 @@ geex.get2group<-function(cll, xgrp, ygrp, sp) {
     names(d)<-c('ID', 'Name', xid, yid, "Diff");
     
     d;
+  }
+}
+
+#####################################################################################################################
+### obsolete function
+# make scatterplot of group means
+geex.plot.scatter<-function(cll, xgrp, ygrp, highlight=NA) {
+  
+  if (identical(NA, cll) | xgrp=='' | ygrp=='') plotEmpty() else {
+    d<-geex.get2group(cll, xgrp, ygrp);
+    corr<-round(cor(d[,2], d[,3]), 4);    
+    main<-paste('Corr = ', corr, ', N = ', nrow(d), sep='');
+    par(mar=c(5,5,2,2));
+    plot(d[, 2], d[, 3], pch=19, cex=1, main=main, cex.main=1.5, col='#88888888', xlab=xgrp, ylab=ygrp, cex.lab=1.5);
+    
+    # Plot highlight genes
+    highlight<-highlight[highlight %in% rownames(d)];
+    if (length(highlight) > 0) {
+      points(d[highlight, 2], d[highlight, 3], pch=19, cex=1.25, col='#0000FF');
+      points(d[highlight, 2], d[highlight, 3], cex=2, col='black');      
+    }
   }
 }

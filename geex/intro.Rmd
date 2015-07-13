@@ -1,0 +1,55 @@
+---
+title: "Introduction to GWAS Explorer"
+author: "Zhe Zhang"
+date: "June 4, 2015"
+output: html_document
+runtime: shiny
+---
+
+- [What is](#bg)
+    - [Awsomics](#bg_aws)
+    - [Rchive](#bg_rch)
+    - [GeEx](#bg_geex)
+- [How to use](#how)
+    - 
+- [FAQ](#faq)
+
+---
+
+## <a name='bg'></a>What is
+
+<a name='bg_aws'></a>**What is Awsomics?** Awsomics is an online toolbox that allows biomedical scientists to perform **_exploratory analysis_** of complex genomic data and facilitates **_knowledge discovery_** through their research. It is currently deployed on [Amazon Web Service](http://aws.amazon.com) (AWS), a cloud platform. Awsomics has 3 major components: **_Rchive_**, the backend collection of currated genomic data; a **_Shiny web server_** that hosts a series of bioinformatics tools, or APPs; and implemented **_bioinformatics methods_** enabling integrative analysis of multiple data sets and data types (see Figure).
+
+![](figure1_awsomics.png)
+
+<a name='bg_rch'></a>**What is Rchive?** Rchive is a collection of **_curated_** genomic data stored on the cloud platform. It makes the overwhelming amount of genomic data and information much **_more accessible_** to biomedical researchers. The same type of data goes through the same processing, formatting, and quality control procedures to support **_integrative analysis_**. Any types of genomic data could be included in Rchive, for example,
+
+- Standard annotation: dbSNP, NCBI gene, OMIM, etc.
+- Functional categorization: BioSystems, KEGG pathways, Gene Ontology, etc.
+- Experimental data and analysis results: GEO, 1000 Genomes, ENCODE, dbGaP, etc.
+
+In addition, users can integrate their own data sets into Rchive, and then analyze them together with public data.
+
+<a name='bg_hub'></a>**What is GeEx?**  GeEx provides access, analysis, and visualization of collections of transcriptome data sets, and functions to 
+
+---
+
+## <a name='how'></a>How to use
+
+
+---
+
+## <a name='faq'></a>FAQ
+
+
+**Q: 
+A:
+
+**Q: 
+A: 
+
+
+
+
+
+

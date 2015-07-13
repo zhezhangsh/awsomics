@@ -29,15 +29,24 @@ select.collection<-paste(rownames(coll), coll$Name, sep=': ');
 geneset<-readRDS(paste(GENESET_HOME, 'metadata_as_tree.rds', sep='/'));
 
 ##########################################################################################################
+# Column names of expression data matrix
+expr_columns<-c("Group mean", "Single sample");
+expr_anno_columns<-c('Name', 'Species', 'Gene_Type', 'Num_Dataset', 'Num_Sample', 'Synonyms', 'Description');
+
+##########################################################################################################
 # Message text
 msg.nocollection<-'No loaded data collection';
 msg.nodataset<-'No selected data set';
 msg.nogroup<-'No selected group';
 msg.nogene<-'No selected gene';
+msg.nogeneset<-'No selected gene set';
 
 ##########################################################################################################
 # datatable options
-dt.options1<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 25);
-dt.options2<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 6, pagingType = 'simple', sScrollX = '100%', lengthChange = FALSE);
-dt.options3<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 10, pagingType = 'simple', lengthChange = FALSE);
-dt.options4<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5, searching=FALSE,  pagingType = 'simple', lengthChange = FALSE);
+dt.options1<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 50 , sScrollX = '100%');
+dt.options2<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
+dt.options3<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 10 , pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
+dt.options4<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , pagingType = 'simple', lengthChange = FALSE, searching = FALSE);
+dt.options5<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 100, pagingType = 'simple', lengthChange = FALSE, searching = FALSE, dom='t');
+
+
