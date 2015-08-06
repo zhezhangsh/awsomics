@@ -10,6 +10,7 @@ export("HtmlKeyValue");
 export("HtmlGeneFactoid");
 export("UrlUcscPosition");
 export("UrlDbsnpId");
+export("UrlEntrezGene");
 export("Symbol2Entrez");
 export("PlotQqFromP");
 export("PlotQqFromPhred");
