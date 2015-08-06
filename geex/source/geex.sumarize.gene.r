@@ -21,6 +21,7 @@ geex.summarize.gene<-function(cll, gn) {
     grp<-as.vector(cll$metadata$Sample[names(d), 'Group']);
     n<-length(unique(grp));
     if (n<2) p<-1 else p<-summary(aov(d~as.factor(grp)))[[1]][1, 5];
+    if (is.null(p)) p<-1;
     c(n, p);
   });
   out$N_Group<-round(grp[1,]);

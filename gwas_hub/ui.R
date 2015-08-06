@@ -141,8 +141,8 @@ shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
                    absolutePanel(top = 60, right = 10, width=240, draggable = TRUE, style = "opacity: 1",                        
                                  wellPanel(
                                    selectInput("keyword.options", "", width=200, names(key.enrich)), # select search type
-                                   sliderInput('enrich.minimum.phred', h5('Minimum Phred'), 0, 60, 20, step=1),
-                                   sliderInput('enrich.minimum.count', h5('Minimum occurance'), 1, 25, 5, step=1),
+                                   sliderInput('enrich.minimum.phred', h5('Minimum Max_Phred'), 0, 60, 20, step=1),
+                                   sliderInput('enrich.minimum.count', h5('Minimum Total_Occurance'), 1, 25, 5, step=1),
                                    submitButton("Refresh", icon=icon('refresh'))
                                  )                 
                    ) # end of absolutePanel                     

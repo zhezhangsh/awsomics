@@ -22,7 +22,6 @@ geex.combined.table<-function(cll, species, scale) {
     out$Synonyms<-as.vector(anno[id, 'Synonyms']);
     out$Description<-as.vector(anno[id, 'description']);
     
-    out$N_Set<-apply(gex,1,function(g) length(g[!is.na(g)]));
     stat<-round(GetRowStat(gex), 2); 
     
     n<-apply(stat, 2, function(s) length(s[!is.na(s)]));

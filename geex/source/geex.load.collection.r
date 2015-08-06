@@ -13,6 +13,7 @@ geex.load.dataset<-function(cll, ds.longname) {
       anno<-cll$gene[rownames(e[[1]]), ,drop=FALSE];
       id<-rownames(anno);
       anno<-data.frame(ID=AddHref(id, UrlEntrezGene(id)), Name=anno$Symbol, Species=anno$Species, N_Set=cll$gene[id, 'Num_Dataset'], row.names=rownames(anno), stringsAsFactors=FALSE);
+      rownames(anno)<-id;
       
       group<-split(rownames(s), s$Group);
       names(group)<-cll$mapping$id2longname[names(group)];
@@ -24,17 +25,18 @@ geex.load.dataset<-function(cll, ds.longname) {
 
 # Load data collection
 geex.load.collection<-function(coll.name, GEX_HOME) {
-  
+
+  coll.meta<-readRDS(paste(GEX_HOME, 'r', 'collection.rds', sep='/'));
   # Files to be loaded
   fn.load<-c('metadata', 'metadata_by_id', 'gene', 'mapping', 'browse_table', 'gex_combined');
-  
-  coll.name<-coll.name[1];
-  
-  if (is.na(coll.name) | coll.name=='') NA else {
+    
+  if (is.na(coll.name[1]) | coll.name[1]=='') NA else {
     msg<-c(); # message to return
     
-    id<-strsplit(coll.name, ': ')[[1]][1];
-    nm<-strsplit(coll.name, ': ')[[1]][2];
+    id<-coll.name[1];
+    nm<-coll.meta[id, 'Name'];
+#     id<-strsplit(coll.name, ': ')[[1]][1];
+#     nm<-strsplit(coll.name, ': ')[[1]][2];
     paths<-c(paste(GEX_HOME, c('public', 'private'), tolower(nm), 'r', sep='/'));
     path<-paths[file.exists(paths)];
     

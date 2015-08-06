@@ -28,7 +28,6 @@ PlotPCA<-function(pca, groups, highlight=NA, filename=NA, dimensions=1:2, legend
   groups<-as.vector(groups);
   groupnames<-unique(groups)
   
-  
   # set col
   if (length(col)!=length(X)) {
     if (length(col)==1) col<-rep(col, length(X))

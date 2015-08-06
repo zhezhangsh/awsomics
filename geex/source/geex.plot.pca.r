@@ -11,7 +11,11 @@ geex.plot.pca<-function(cll, pc.x, pc.y, clr, ds, gp, rid) {
   
   if (identical(NA, cll)) plotEmpty('No selected data set') else {
     ds.id<-as.vector(cll$mapping$longname2id[ds]);
-    e<-readRDS(paste(cll$path, '/gex_', ds.id, '.rds', sep=''))[[1]][[1]]; 
+    d<-geex.load.dataset(cll, ds);
+    #e<-readRDS(paste(cll$path, '/gex_', ds.id, '.rds', sep=''))[[1]][[1]]; 
+    e<-d$data$logged;
+    if (!setequal('human', tolower(unique(d$anno$Species))))  e<-e[rownames(d$anno)[d$anno$Species!='human'], , drop=FALSE];
+    e<-e[!is.na(rowSums(e, na.rm=TRUE)), , drop=FALSE];
     smp<-cll$metadata$Sample;
     smp<-smp[smp$Dataset==ds.id, , drop=FALSE];
     grp<-cll$metadata$Group[as.vector(smp$Group), , drop=FALSE];
@@ -27,7 +31,7 @@ geex.plot.pca<-function(cll, pc.x, pc.y, clr, ds, gp, rid) {
     grp.nm<-grp.nm[grp.nm %in% gp];
     
     if (ncol(e) < 2) plotEmpty('Not enough samples to run PCA') else {
-      cex<-min(4, 60/ncol(e));
+      cex<-max(2, min(4, 60/ncol(e)));
       pr<-prcomp(t(e));
       
       pc<-as.numeric(sub('PC', '', c(pc.x, pc.y), ignore.case=TRUE));

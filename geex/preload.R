@@ -34,6 +34,10 @@ expr_columns<-c("Group mean", "Single sample");
 expr_anno_columns<-c('Name', 'Species', 'Gene_Type', 'Num_Dataset', 'Num_Sample', 'Synonyms', 'Description');
 
 ##########################################################################################################
+# options
+data.level.options<-c('Data set', 'Group', 'Sample');
+
+##########################################################################################################
 # Message text
 msg.nocollection<-'No loaded data collection';
 msg.nodataset<-'No selected data set';
@@ -43,10 +47,15 @@ msg.nogeneset<-'No selected gene set';
 
 ##########################################################################################################
 # datatable options
-dt.options1<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 50 , sScrollX = '100%');
-dt.options2<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
-dt.options3<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 10 , pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
-dt.options4<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , pagingType = 'simple', lengthChange = FALSE, searching = FALSE);
-dt.options5<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 100, pagingType = 'simple', lengthChange = FALSE, searching = FALSE, dom='t');
+dt.options1<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 50 , 
+                  sScrollX = '100%');
+dt.options2<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , 
+                  pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
+dt.options3<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 10 , 
+                  pagingType = 'simple', lengthChange = FALSE, sScrollX = '100%');
+dt.options4<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 5  , 
+                  pagingType = 'simple', lengthChange = FALSE, searching = FALSE);
+dt.options5<-list(autoWidth = TRUE, caseInsensitve = TRUE, regex = TRUE, pageLength = 100, 
+                  pagingType = 'simple', lengthChange = FALSE, searching = FALSE, dom='t');
 
 
