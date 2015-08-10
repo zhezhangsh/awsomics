@@ -22,3 +22,4 @@ export("CollectGwasDbData");
 export("SearchVariantPositionDbById");
 export("SearchVariantPositionDbByLoci");
 export("ConnectToVariantPositionDb");
+export("GroupSample");
