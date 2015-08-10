@@ -1,0 +1,6 @@
+---
+output: html_document
+---
+
+![](./big_data.png)
+

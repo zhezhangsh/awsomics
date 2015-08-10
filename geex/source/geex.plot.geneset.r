@@ -29,6 +29,5 @@ geex.plot.geneset<-function(cll, grp, type, scale, color, normalize, gs) {
       rownames(gex)<-paste(gid, gnm, sep=' : ');
       PlotMatrixGroup(gex, grp2smp, type, normalize, color);
     }
-  }
-  
+  } 
 }

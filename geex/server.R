@@ -9,14 +9,21 @@ shinyServer(function(input, output, session) {
   load.coll0<-reactive({
     rid1<-input$home.table_rows_selected;
     rid2<-input$home.table_row_last_clicked;
-    if(length(rid1)==0 | length(rid2)==0) NA else { if (!(rid2 %in% rid1)) NA else geex.load.collection(rid2, GEX_HOME); }
+    
+    if(length(rid1)==0 | length(rid2)==0) NA else if (!(rid2 %in% rid1)) NA else {
+      withProgress(geex.load.collection(rid2, GEX_HOME), 
+                   message=paste("Loading data collection", rid2, '...'), 
+                   detail="\nPlease wait until data is loaded to use GeEx.");
+    } 
   });
   
   load.coll<-reactive({ 
       coll.loaded<-load.coll0();
       if (identical(coll.loaded, NA)) NA else {
         if(input$regroup.check) {
-          coll.loaded<-geex.regroup(coll.loaded, input$regroup.dataset_rows_selected, input$regroup.group_rows_selected);
+          withProgress(
+            coll.loaded<-geex.regroup(coll.loaded, input$regroup.dataset_rows_selected, input$regroup.group_rows_selected), 
+            message="Re-grouping samples in collection ...", detail="\nPlease wait until the re-grouping is done.");
           updateCheckboxInput(session, 'regroup.check', 'Uncheck box to restore default grouping');
         } else {
           coll.loaded$extra$regrouped<-FALSE;
@@ -117,9 +124,9 @@ shinyServer(function(input, output, session) {
         spe<-sub(' homolog$', '', input$expr.species);
         spe<-spe[spe %in% ds$anno$Species];
         if (length(grp) == 0) geex.empty.matrix("No selected group; must select one") else 
-          if (length(spe) == 0) geex.empty.matrix("No selected species; must select one") else 
-          geex.dataset.table(cll, ds.selected, grp, spe, input$expr.scale, expr_columns, 
-                             GetRowStatTypes(), expr_anno_columns, c());
+          if (length(spe) == 0) geex.empty.matrix("No selected species; must select one") else
+            withProgress(geex.dataset.table(cll, ds.selected, grp, spe, input$expr.scale, expr_columns, GetRowStatTypes(), expr_anno_columns, c()), 
+                         message="Calculating descriptive stats ...", detail="\nPlease wait for the full result table.");
       }
     }
   });
@@ -217,7 +224,8 @@ shinyServer(function(input, output, session) {
   combine.dataset<-reactive({   
     cll<-load.coll();
     if (identical(NA, cll)) geex.empty.matrix(msg.nocollection) else {
-      geex.combined.table(cll, input$comb.species, input$comb.scale);
+      withProgress(geex.combined.table(cll, input$comb.species, input$comb.scale), 
+                   message="Calculating descriptive stats ...", detail="\nPlease wait for the full result table.")
     }
   });
 
@@ -256,6 +264,8 @@ shinyServer(function(input, output, session) {
       geex.geneset.table(geneset, input$comb.gs.source, input$comb.gs.coll, input$comb.gs.species);  
     }, options = dt.options2, rownames=FALSE, server=TRUE, escape = FALSE)});
   
+  output$comb.title<-renderUI({ 
+    list(h2("Gene-Data set"), HTML('Summary of gene expression level across all data sets. Using relative expression percentiles is preferred if data sets were from different studies.')) });   
   output$comb.table <- DT::renderDataTable({
     cll<-load.coll();
     if (identical(NA, cll))  geex.empty.matrix(msg.nocollection) else { 
@@ -374,6 +384,15 @@ shinyServer(function(input, output, session) {
       updateCheckboxGroupInput(session, 'pca.group', choices=names(ds$group), selected=names(ds$group));
       updateSelectizeInput(session, 'pca.x', choices=paste('PC', 1:ncol(ds$data[[1]]), sep=''), selected='PC1');
       updateSelectizeInput(session, 'pca.y', choices=paste('PC', 1:ncol(ds$data[[1]]), sep=''), selected='PC2');
+      
+      sp0<-input$pca.geneset.species;
+      sp<-names(geneset[[input$pca.geneset.source]][[input$pca.geneset.coll]]);
+      ds<-geex.load.dataset(load.coll(), input$pca.dataset);
+      ds.sp<-unique(as.vector(ds$anno$Species));
+      sp<-sp[sp %in% ds.sp];
+      sp<-c(sp[tolower(sp)!='human'], 'human');
+      if (sp0 %in% sp) sp1<-sp0 else sp1<-sp[1];
+      updateSelectizeInput(session, 'pca.geneset.species', choices=sp, selected=sp1);      
     }
   });
   observeEvent(input$pca.clear, {
@@ -384,6 +403,30 @@ shinyServer(function(input, output, session) {
       }, options = dt.options3, escape = FALSE);
   });
   
+  observeEvent(input$pca.geneset.source, { 
+    updateSelectizeInput(session, 'pca.geneset.coll', choices=names(geneset[[input$pca.geneset.source]])); 
+  });
+  observeEvent(input$pca.geneset.coll, { 
+    sp<-names(geneset[[input$pca.geneset.source]][[input$pca.geneset.coll]]);
+    if (!identical(NA, load.coll())) {
+      ds<-geex.load.dataset(load.coll(), input$pca.dataset);
+      ds.sp<-unique(as.vector(ds$anno$Species));
+      sp<-sp[sp %in% ds.sp];
+      sp<-c(sp[tolower(sp)!='human'], 'human');
+    };
+    updateSelectizeInput(session, 'pca.geneset.species', choices=sp); 
+  });
+  observeEvent(input$pca.geneset.species, { 
+    output$pca.geneset.table <- DT::renderDataTable({ 
+      geex.geneset.table(geneset, input$pca.geneset.source, input$pca.geneset.coll, input$pca.geneset.species);  
+    }, options = dt.options2, rownames=FALSE, server=TRUE, escape = FALSE)
+  });
+  observeEvent(input$pca.geneset.clear, { 
+    output$pca.geneset.table <- DT::renderDataTable({ 
+      geex.geneset.table(geneset, input$pca.geneset.source, input$pca.geneset.coll, input$pca.geneset.species);  
+    }, options = dt.options2, rownames=FALSE, selection='single', server=TRUE, escape = FALSE)
+  });
+  
   output$pca.title<-renderUI({list(
     h2("Principal Components Analysis"), 
     HTML(paste('Unsupervised clustering of samples in the same data set by',  
@@ -391,15 +434,26 @@ shinyServer(function(input, output, session) {
   output$pca.message<-renderUI({ 
     if (identical(NA, load.coll())) list(h3(HTML(msg.nocollection)), br(), br())  else 
       list(h3(HTML(paste("Data set", geex.html.msg(input$pca.dataset)))), br(), br()) })
-  output$pca.plot <- renderPlot({ 
+  output$pca.plot <- renderPlot({
+    if (length(input$pca.geneset.table_rows_selected) > 0) {
+      src<-input$pca.geneset.source;
+      cll<-input$pca.geneset.coll;
+      spe<-input$pca.geneset.species;
+      rid<-CleanHtmlTags(input$pca.geneset.table_rows_selected);
+      rid<-rid[rid %in% rownames(geneset[[src]][[cll]][[spe]])]; 
+      if (length(rid) > 0) gn.subset<-unique(unlist(readRDS(paste(GENESET_HOME, '/', tolower(src), '_list.rds', sep=''))[rid], use.names=FALSE)) else 
+        gn.subset<-c();
+    } else gn.subset<-NA;
+    
     geex.plot.pca(load.coll(), input$pca.x, input$pca.y, input$pca.color, input$pca.dataset, input$pca.group, 
-                  input$pca.table_rows_selected); }, height = 600, width = 800);
+                  input$pca.table_rows_selected, gn.subset); }, height = 720, width = 960);
+  
   output$pca.table <- DT::renderDataTable({
     cll<-load.coll();
     if (identical(cll, NA)) geex.empty.matrix("Empty table") else 
       cll$metadata$Sample[cll$metadata$Sample$Dataset == strsplit(input$pca.dataset, ': ')[[1]][1], 
                           c('Name', 'Group'), drop=FALSE];
-  }, options = dt.options3, escape = FALSE);
+  }, options = dt.options2, escape = FALSE);
   }
   
   ########################################################################################
@@ -414,18 +468,23 @@ shinyServer(function(input, output, session) {
     
     updateSelectizeInput(session, 'bar.dataset', choices=selected$dataset, selected=ds);
     
-    if (length(rid)==0 | setequal(rownames(cll$metadata$Dataset), selected$dataset)) output$bar.dataset.message<-renderUI({ '' }) else 
-      output$bar.dataset.message<-renderUI({ list(HTML(geex.html.msg("Only data sets including all selected genes are listed;")), br(),
-                                                  HTML(geex.html.msg("Clear gene selection to list all data sets."))) })
-    
+    if (length(rid)==0 | identical(cll, NA)) output$bar.dataset.message<-renderUI({ '' }) else {
+      output$bar.dataset.message<-renderUI({
+        if (setequal(rownames(cll$metadata$Dataset), selected$dataset)) '' else 
+          list(HTML(geex.html.msg("Only data sets including all selected genes are listed;")), br(), HTML(geex.html.msg("Clear gene selection to list all data sets.")))
+      }) 
+    }     
     selected;
   });
   
   observeEvent(input$bar.dataset, {
     ds<-geex.load.dataset(load.coll(), input$bar.dataset);
-    if (!identical(NA, ds)) updateCheckboxGroupInput(session, 'bar.group', choices=names(ds$group), selected=names(ds$group));   
-    if (length(input$bar.table_rows_selected) == 0)         
-      output$bar.table <- DT::renderDataTable({ ds$anno; }, options = dt.options3, rownames=FALSE, server=TRUE, escape = FALSE);   
+    if (!identical(NA, ds)) {
+      updateCheckboxGroupInput(session, 'bar.group', choices=names(ds$group), selected=names(ds$group));   
+      if (length(input$bar.table_rows_selected) == 0) output$bar.table <- DT::renderDataTable({ ds$anno; }, options = dt.options3, rownames=FALSE, server=TRUE, escape = FALSE);
+    } else {
+      output$bar.table <- DT::renderDataTable({ geex.empty.matrix(msg.nodataset) }, options = dt.options3, rownames=FALSE, server=TRUE, escape = FALSE);
+    }
   });
 
   observeEvent(input$bar.clear, {
@@ -465,30 +524,31 @@ shinyServer(function(input, output, session) {
   });
   
   ########################## Gene dictionary 
-  observeEvent(input$lookup.key, {
-    if (input$lookup.key!='' & !is.null(input$lookup.key)) {
-      output$lookup.table <- DT::renderDataTable({
-        geex.lookup.gene(geex.load.dataset(load.coll(), input$bar.dataset)$anno, input$lookup.species, 
-                         input$lookup.key, GENE_HOME); 
-      }, options = dt.options4, selection='none', rownames=FALSE, server=TRUE,rownames=FALSE, server=TRUE,  escape = FALSE)   
-    } else geex.empty.matrix('No search key');
-  });
   observeEvent(input$lookup.option, {
     cll<-load.coll();
     if (input$lookup.option & !identical(NA, cll)) {
       output$lookup.table<-DT::renderDataTable({ geex.empty.matrix('No search key'); }, options=list(dom='t'))
-      output$lookup.key.ui<-renderUI({ textInput("lookup.key", "", '') });
+      output$lookup.key.ui<-renderUI({ textInput("bar.lookup.key", "", '') });
       output$lookup.species.ui<-renderUI({ 
-        selectizeInput("lookup.species", '', choices=unique(cll$gene$Species), selected='human') });
-      output$lookup.table.ui<-renderUI({ DT::dataTableOutput('lookup.table') });
+        selectizeInput("bar.lookup.species", '', choices=unique(cll$gene$Species), selected='human') });
+      output$lookup.table.ui<-renderUI({ DT::dataTableOutput('bar.lookup.table') });
     } else { 
-      updateTextInput(session, "lookup.key", NULL, NULL);
-      updateSelectizeInput(session, "lookup.species", NULL, NULL, NULL);
+      updateTextInput(session, "bar.lookup.key", NULL, NULL);
+      updateSelectizeInput(session, "bar.lookup.species", NULL, NULL, NULL);
       output$lookup.key.ui <- renderUI({br()});
       output$lookup.species.ui <- renderUI({br()}); 
       output$lookup.table.ui <- renderUI({br()}); 
     }
-  }); 
+  });
+  observeEvent(input$bar.lookup.key, {
+    ky<-input$bar.lookup.key;
+    output$bar.lookup.table <- DT::renderDataTable({
+      if (ky!='' & !is.null(ky)) geex.lookup.gene(geex.load.dataset(load.coll(), input$bar.dataset)$anno, input$bar.lookup.species, ky, GENE_HOME) else 
+        geex.empty.matrix('No search key');
+    }, options = dt.options4, selection='none', rownames=FALSE, server=TRUE, escape = FALSE);
+  });
+  
+  ########################## 
   
   } # end of menu tab
   
@@ -541,29 +601,39 @@ shinyServer(function(input, output, session) {
     h2("Expression pattern of a gene set"),
     HTML('Compare and visualize overall expression levels of a gene set between sample groups.')) });
   output$geneset.message<-renderUI({
-    if (identical(NA, load.coll())) list(h3(msg.nocollection), br(), br()) else
-      if (length(input$geneset.table_rows_selected) == 0) list(h3(msg.nogeneset), br(), br()) else {
-        rid<-CleanHtmlTags(input$geneset.table_rows_selected);
-        nm<-as.vector(geneset[[input$geneset.source]][[input$geneset.coll]][[input$geneset.species]][rid[length(rid)], 'Name'])
-        list(h3(HTML(paste('Gene set', geex.html.msg(nm)))), br(), br());
-      }
+    if (identical(NA, load.coll())) list(h3(msg.nocollection), br(), br()) else {
+      rid0<-input$geneset.table_rows_selected;
+      rid<-input$geneset.table_row_last_clicked;
+      if (length(rid0)>0 & length(rid)>0) {
+        if (rid0[length(rid0)]==rid) {
+          rid<-CleanHtmlTags(input$geneset.table_rows_selected);
+          nm<-as.vector(geneset[[input$geneset.source]][[input$geneset.coll]][[input$geneset.species]][rid[length(rid)], 'Name'])
+          list(h3(HTML(paste('Gene set', geex.html.msg(nm)))), br(), br());
+        } else list(h3(msg.nogeneset), br(), br());
+      } else list(h3(msg.nogeneset), br(), br());
+    }
   });
   
   output$geneset.plot <- renderPlot({
-    src<-input$geneset.source;
-    cll<-input$geneset.coll;
-    spe<-input$geneset.species;
-    grp<-input$geneset.group;
-    rid<-CleanHtmlTags(input$geneset.table_rows_selected);
-    rid<-rid[rid %in% rownames(geneset[[src]][[cll]][[spe]])]; 
-    rid<-rid[length(rid)];
-    gs<-readRDS(paste(GENESET_HOME, '/', tolower(src), '_list.rds', sep=''))[rid];
-    if (length(gs) > 0) {
-      names(gs)<-as.vector(geneset[[src]][[cll]][[spe]][names(gs), 'Name']);  
-      out<-geex.plot.geneset(load.coll(), grp, input$geneset.type, input$geneset.scale, 
-                             input$geneset.color, input$geneset.normalize, gs[[1]]);  
+    rid0<-input$geneset.table_rows_selected;
+    rid<-input$geneset.table_row_last_clicked;
+    if (length(rid0)>0 & length(rid)>0) if (rid0[length(rid0)]==rid) {
+      src<-input$geneset.source;
+      cll<-input$geneset.coll;
+      spe<-input$geneset.species;
+      grp<-input$geneset.group;
+      rid<-CleanHtmlTags(input$geneset.table_rows_selected);
+      rid<-rid[rid %in% rownames(geneset[[src]][[cll]][[spe]])]; 
+      rid<-rid[length(rid)];
+      gs<-readRDS(paste(GENESET_HOME, '/', tolower(src), '_list.rds', sep=''))[rid];
+      if (length(gs) > 0) {
+        names(gs)<-as.vector(geneset[[src]][[cll]][[spe]][names(gs), 'Name']);  
+        out<-geex.plot.geneset(load.coll(), grp, input$geneset.type, input$geneset.scale, 
+                               input$geneset.color, input$geneset.normalize, gs[[1]]);  
+      }
     }
-  });  
+  });
+  
   }
   
   ########################################################################################
@@ -623,18 +693,14 @@ shinyServer(function(input, output, session) {
     updateSelectizeInput(session, 'two.species', choices=sp); 
   });
   observeEvent(input$two.species, { 
-    output$two.table.geneset <- DT::renderDataTable({ 
-      geex.geneset.table(geneset, input$two.source, input$two.coll, input$two.species);  
+    output$two.table.geneset <- DT::renderDataTable({  geex.geneset.table(geneset, input$two.source, input$two.coll, input$two.species);  
     }, options = dt.options2, rownames=FALSE, server=TRUE, escape = FALSE) 
-    output$two.geneset.stat <- DT::renderDataTable({ 
-      geex.empty.matrix(msg.nogeneset); }, options=list(dom='t'), selection='none');
+    output$two.geneset.stat <- DT::renderDataTable({ geex.empty.matrix(msg.nogeneset); }, options=list(dom='t'), selection='none');
   });
   observeEvent(input$two.clear.geneset, { 
-    output$two.table.geneset <- DT::renderDataTable({ 
-      geex.geneset.table(geneset, input$two.source, input$two.coll, input$two.species);  
+    output$two.table.geneset <- DT::renderDataTable({ geex.geneset.table(geneset, input$two.source, input$two.coll, input$two.species);  
     }, options = dt.options2, rownames=FALSE, server=TRUE, escape = FALSE) 
-    output$two.geneset.stat <- DT::renderDataTable({ 
-      geex.empty.matrix(msg.nogeneset); }, options=list(dom='t'), selection='none');
+    output$two.geneset.stat <- DT::renderDataTable({ geex.empty.matrix(msg.nogeneset); }, options=list(dom='t'), selection='none');
   });
   observeEvent(input$two.clear, { 
     output$two.table <- DT::renderDataTable({ 
@@ -725,12 +791,11 @@ shinyServer(function(input, output, session) {
     }
   }); 
   observeEvent(input$coex.lookup.key, {
-    if (input$coex.lookup.key!='' & !is.null(input$coex.lookup.key)) {
-      output$coex.lookup.table <- DT::renderDataTable({
-        geex.lookup.gene(geex.load.dataset(load.coll(), input$bar.dataset)$anno, input$coex.lookup.species, 
-                         input$coex.lookup.key, GENE_HOME); 
+    ky<-input$coex.lookup.key;
+    output$coex.lookup.table <- DT::renderDataTable({
+        if (ky!='' & !is.null(ky)) geex.lookup.gene(geex.load.dataset(load.coll(), input$bar.dataset)$anno, input$coex.lookup.species, ky, GENE_HOME) else 
+          geex.empty.matrix('No search key');
       }, options = dt.options4, selection='none', rownames=FALSE, server=TRUE, escape = FALSE)   
-    } else geex.empty.matrix('No search key');
   });
   
   observeEvent(input$coex.clear.ds, {
@@ -782,16 +847,17 @@ shinyServer(function(input, output, session) {
   ########################################## "filter gene" tab ######################################################
   {
     filter.table <- reactive({ 
-       tbl<-geex.filter.table(load.coll(), input$filter.dataset, input$filter.group, input$filter.sample);
-       updateSliderInput(session, 'filter.absolute', value=c(0, 100));
-       updateSliderInput(session, 'filter.relative', value=c(0, 100)); 
-       ch<-c('Higher', 'Lower');
-       if (tbl$is.empty) updateRadioButtons(session, 'filter.direction', label=ch) else {
-         names(ch)<-paste(c('Higher', 'Lower'), 'in', tbl$id); 
-         updateRadioButtons(session, 'filter.direction', NULL, choices=ch, selected=ch[1], inline=TRUE);
-       }
+      withProgress(tbl<-geex.filter.table(load.coll(), input$filter.dataset, input$filter.group, input$filter.sample), 
+                   message='Preparing gene filtering table ...', detail='\nPlease wait until full table appears below.');
+      updateSliderInput(session, 'filter.absolute', value=c(0, 100));
+      updateSliderInput(session, 'filter.relative', value=c(0, 100)); 
+      ch<-c('Higher', 'Lower');
+      if (tbl$is.empty) updateRadioButtons(session, 'filter.direction', label=ch) else {
+        names(ch)<-paste(c('Higher', 'Lower'), 'in', tbl$id); 
+        updateRadioButtons(session, 'filter.direction', NULL, choices=ch, selected=ch[1], inline=TRUE);
+      }
          
-       tbl;
+      tbl;
     });
     
     observeEvent(input$filter.dataset, {
@@ -855,7 +921,7 @@ shinyServer(function(input, output, session) {
   });
 
   output$regroup.title<-renderUI({ 
-    list(h2("Re-group samples"), HTML('Re-define data sets and groups based on sample features.')) 
+    list(h2("Re-group samples"), HTML('Re-define data sets and groups based on sample features. Note that grouping samples from different studies into the same data set should always be avoided.')) 
   });
   output$regroup.grp.msg<-renderUI({
     rid<-input$regroup.group_rows_selected;

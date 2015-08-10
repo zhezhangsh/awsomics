@@ -130,10 +130,24 @@ shinyUI(
                      column(4, wellPanel(checkboxGroupInput("pca.group", label='Select group(s)', choices=c()))))),
                    htmlOutput('pca.message'), br(),
                    plotOutput('pca.plot')),
-            column(4, wellPanel(
-              h5('Select sample(s) to highlight'),
-              DT::dataTableOutput('pca.table'),
-              actionButton("pca.clear", 'Clear selection'))))   
+            column(4, 
+                   wellPanel(
+                     h4('Select gene subset(s) to re-run PCA'),
+                     column(3, h5("Source")), 
+                     column(8, selectizeInput("pca.geneset.source", NULL, names(geneset), selected=names(geneset)[1], 
+                                              options=list('caption-side'='bottom'))),
+                     column(3, h5("Collection")), 
+                     column(8, selectizeInput("pca.geneset.coll", NULL, names(geneset[[1]]), 
+                                              selected=names(geneset[[1]])[1])),
+                     column(3, h5("Species")), 
+                     column(8, selectizeInput("pca.geneset.species", NULL, names(geneset[[1]][[1]]), 
+                                              selected=names(geneset[[1]][[1]])[1])),
+                     DT::dataTableOutput('pca.geneset.table', width='100%'), 
+                     actionButton("pca.geneset.clear", 'Clear selection')),
+                   wellPanel(
+                     h5('Select sample(s) to highlight'),
+                     DT::dataTableOutput('pca.table'),
+                     actionButton("pca.clear", 'Clear selection'))))   
       ), # end of tabPanel     
 
       ############################################################################## 
@@ -170,6 +184,7 @@ shinyUI(
                      column(6, uiOutput("lookup.table.ui")
                      )))))
           ), # end of tabPanel     
+
       
       ############################################################################## 
       ############################### "Gene set" tab ###############################
@@ -271,11 +286,11 @@ shinyUI(
                      selectizeInput("coex.color", 'Select color range', GetColorTypes(),  width='60%'),
                      
                      fluidRow(
-                       column(6,
+                       column(4,
                               checkboxInput('coex.lookup.option', HTML(geex.html.msg("Look up gene in dictionary")), FALSE),
                               uiOutput("coex.lookup.key.ui"),
                               uiOutput("coex.lookup.species.ui")                       
-                       ), column(6, uiOutput("coex.lookup.table.ui")))
+                       ), column(8, uiOutput("coex.lookup.table.ui")))
                    )),
                    column(4, wellPanel(h4("Select gene 1"), DT::dataTableOutput('coex.gene1', width='100%'))),
                    column(4, wellPanel(h4("Select gene 2"), DT::dataTableOutput('coex.gene2', width='100%'))))),

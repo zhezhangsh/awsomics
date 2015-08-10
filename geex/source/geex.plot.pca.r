@@ -1,4 +1,4 @@
-geex.plot.pca<-function(cll, pc.x, pc.y, clr, ds, gp, rid) {
+geex.plot.pca<-function(cll, pc.x, pc.y, clr, ds, gp, rid, gn.subset) {
   # cll         A data collection returned by geex.load.collection
   # pc.x, pc.y  The PCs to show
   # clr         The color choice
@@ -31,12 +31,18 @@ geex.plot.pca<-function(cll, pc.x, pc.y, clr, ds, gp, rid) {
     grp.nm<-grp.nm[grp.nm %in% gp];
     
     if (ncol(e) < 2) plotEmpty('Not enough samples to run PCA') else {
-      cex<-max(2, min(4, 60/ncol(e)));
-      pr<-prcomp(t(e));
+      gn<-gn.subset[gn.subset %in% rownames(e)];
       
-      pc<-as.numeric(sub('PC', '', c(pc.x, pc.y), ignore.case=TRUE));
-      
-      PlotPCA(pr, grp.nm, col=col, cex=cex, legend=TRUE, highlight=rid, dimensions=pc, new.window=FALSE);
+      if (!identical(NA, gn.subset) & length(gn)<3) plotEmpty('No enough genes to run PCA') else {
+        if (length(gn) > 2) e<-e[gn, ];
+        
+        cex<-max(2, min(4, 60/ncol(e)));
+        pr<-prcomp(t(e));
+        
+        pc<-as.numeric(sub('PC', '', c(pc.x, pc.y), ignore.case=TRUE));
+        
+        PlotPCA(pr, grp.nm, col=col, cex=cex, legend=TRUE, highlight=rid, dimensions=pc, new.window=FALSE);
+      }
     }
   }
 }

@@ -39,10 +39,10 @@ geex.plot.two<-function(cll, xgrp, ygrp, type, scale, color, species, gn, gs) {
         
         nm<-c(names(gs), 'All other genes');
         n<-c(sapply(gs, length), length(bg));
-        m<-format(c(sapply(gs, function(g) if (length(g)>0) mean(dff[g], na.rm=TRUE) else NA), mean(bg)), digit=4);
-        md<-format(c(sapply(gs, function(g) if (length(g)>0) median(dff[g], na.rm=TRUE) else NA), median(bg)), digit=4);
-        pt<-c(format(sapply(gs, function(g) if (length(g)>1 & length(bg)>1) t.test(dff[g], bg)$p.value[[1]] else NA), digit=2, scientific=TRUE), '');
-        pr<-c(format(sapply(gs, function(g) if (length(g)>1 & length(bg)>1) wilcox.test(dff[g], bg)$p.value[[1]] else NA), digit=2, scientific=TRUE), '');
+        m<-round(c(sapply(gs, function(g) if (length(g)>0) mean(dff[g], na.rm=TRUE) else NA), mean(bg)), 4);
+        md<-round(c(sapply(gs, function(g) if (length(g)>0) median(dff[g], na.rm=TRUE) else NA), median(bg)), 4);
+        pt<-sapply(gs, function(g) if (length(g)>1 & length(bg)>1) t.test(dff[g], bg)$p.value[[1]] else NA);
+        pr<-sapply(gs, function(g) if (length(g)>1 & length(bg)>1) wilcox.test(dff[g], bg)$p.value[[1]] else NA);
         
         col<-plotted$highlight.color; 
         col<-col[names(col) %in% nm];
@@ -53,7 +53,13 @@ geex.plot.two<-function(cll, xgrp, ygrp, type, scale, color, species, gn, gs) {
           nm<-paste('<font color="', c, '">', nm, '</font>', sep='');
         }
         
-        out$geneset.stat<-data.frame(Name=nm, N=n, Mean=m, Median=md, pValueT=pt, pValueRST=pr, stringsAsFactors=FALSE);
+        out$geneset.stat<-data.frame(Name=nm, N=n, Mean=m, Median=md, p_T=c(pt, NA), p_RST=c(pr, NA), stringsAsFactors=FALSE);
+        out$geneset.stat$p_T[!is.na(c(pt, NA))]<-as.numeric(format.pval(pt[!is.na(pt)], 2));
+        out$geneset.stat$p_RST[!is.na(c(pr, NA))]<-as.numeric(format.pval(pr[!is.na(pr)], 2));
+        if (length(pt) > 2) {
+          out$geneset.stat$FDR_T=c(round(p.adjust(pt, method='BH'), 3), NA);
+          out$geneset.stat$FDR_RST=c(round(p.adjust(pr, method='BH'), 3), NA);          
+        }
       }
       ######################################################     
     }

@@ -103,18 +103,16 @@ geex.select.gene<-function(cll, ds.id, grp.id, gn.id) {
                 p<-summary(aov(d~f))[[1]][1, 5];
                 if (is.null(p)) NA else p;
               })
-              stat<-data.frame(round(ms, 4), p_ANOVA=as.numeric(format.pval(p, 2)), stringsAsFactors=FALSE);
+              stat<-data.frame(round(ms, 4), p_ANOVA=as.numeric(format.pval(p, 2)), FDR=round(p.adjust(p, method='BH'), 3), stringsAsFactors=FALSE);
             } else {
               m<-rowMeans(d, na.rm=TRUE);
               p<-rep(NA, nrow(d));
               stat<-data.frame(round(m), as.numeric(format.pval(p, 2)), stringsAsFactors = FALSE)
             }
             stat<-data.frame(ds$anno[rownames(stat), 1:3, drop=FALSE], stat, stringsAsFactors=FALSE);
-            
             ds<-cll$gex_combined$logged[rownames(d), rownames(cll$metadata$Dataset), drop=FALSE];
             ds<-colnames(ds)[!is.na(colSums(ds))];
             ds<-as.vector(cll$mapping$id2longname[ds]);
-            
             out$message<-geex.html.gene.name(gn.id, FALSE, cll);
             out$data<-d;
             out$table<-stat;
