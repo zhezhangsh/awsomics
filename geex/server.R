@@ -390,8 +390,8 @@ shinyServer(function(input, output, session) {
       ds<-geex.load.dataset(load.coll(), input$pca.dataset);
       ds.sp<-unique(as.vector(ds$anno$Species));
       sp<-sp[sp %in% ds.sp];
-      sp<-c(sp[tolower(sp)!='human'], 'human');
-      if (sp0 %in% sp) sp1<-sp0 else sp1<-sp[1];
+      sp<-c(sp[tolower(sp)!='human'], 'human'); 
+      if (sp0 %in% sp) sp1<-sp0 else sp1<-sp[1]; 
       updateSelectizeInput(session, 'pca.geneset.species', choices=sp, selected=sp1);      
     }
   });
@@ -431,7 +431,7 @@ shinyServer(function(input, output, session) {
     h2("Principal Components Analysis"), 
     HTML(paste('Unsupervised clustering of samples in the same data set by',  
          '<a href="https://en.wikipedia.org/wiki/Principal_component_analysis" target="_blank">PCA</a>'))) });  
-  output$pca.message<-renderUI({ 
+  output$pca.message<-renderUI({
     if (identical(NA, load.coll())) list(h3(HTML(msg.nocollection)), br(), br())  else 
       list(h3(HTML(paste("Data set", geex.html.msg(input$pca.dataset)))), br(), br()) })
   output$pca.plot <- renderPlot({
@@ -444,7 +444,6 @@ shinyServer(function(input, output, session) {
       if (length(rid) > 0) gn.subset<-unique(unlist(readRDS(paste(GENESET_HOME, '/', tolower(src), '_list.rds', sep=''))[rid], use.names=FALSE)) else 
         gn.subset<-c();
     } else gn.subset<-NA;
-    
     geex.plot.pca(load.coll(), input$pca.x, input$pca.y, input$pca.color, input$pca.dataset, input$pca.group, 
                   input$pca.table_rows_selected, gn.subset); }, height = 720, width = 960);
   
@@ -883,6 +882,8 @@ shinyServer(function(input, output, session) {
     output$filter.msg<-renderUI({ list(h3(HTML(filter.table()$message)), br()) })
     output$filter.table <- DT::renderDataTable({  
       tbl<-filter.table(); 
+      saveRDS(tbl, '/zhangz/x.rds');
+      geex.empty.matrix('test');
       if (tbl$is.empty) geex.empty.matrix(tbl$message) else {
         g<-tbl$gex;
         range.obs<-input$filter.absolute;

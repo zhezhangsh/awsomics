@@ -1,0 +1,6 @@
+
+Listening on http://127.0.0.1:56626
+Error in startServer(host, port, handlerManager$createHttpuvApp()) : 
+  Failed to create server
+Calls: runApp -> startApp -> startServer
+Execution halted

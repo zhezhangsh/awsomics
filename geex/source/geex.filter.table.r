@@ -47,7 +47,7 @@ geex.filter.table<-function(cll, ds.long, grp.long, smp.long) {
     colnames(g)[4]<-paste(id, 'Min', sep='_vs_');
     colnames(g)[5]<-paste(id, 'Max', sep='_vs_');
       
-    d<-cbind(ID=AddHref(rownames(anno), UrlEntrezGene(rownames(anno))), anno[, -ncol(anno)], g);
+    d<-data.frame(ID=AddHref(rownames(anno), UrlEntrezGene(rownames(anno))), anno[, -ncol(anno)], g, stringsAsFactors = FALSE);
     d$Description<-anno[, ncol(anno)];
 
     out$id<-id;
