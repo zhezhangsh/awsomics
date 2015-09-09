@@ -1,9 +1,10 @@
 # Gene set enrichment analysis by Fisher test
-TestGSE<-function(gs, u, coll, size.min=10, size.max=500) {
+TestGSE<-function(gs, u, coll, size.min=10, size.max=500, p.cutoff=0.05) {
   # gs                    A vector of testing genes
   # u                     Universe set of genes
   # coll                  Gene set collections; list with unique names
   # size.min, size.max    Minimum and maximum number of genes in a gene set to be tested
+  # p.cutoff              P value cutoff to be included in the results
   
   gs<-gs[gs %in% u];
   
@@ -43,8 +44,9 @@ TestGSE<-function(gs, u, coll, size.min=10, size.max=500) {
   fwer<-p.adjust(p, method='bonferroni');
   fwer<-round(exp((ceiling(abs(log10(fwer)))+log10(fwer))*log(10)), 2)*10^floor(log10(fwer));
   
-  stat<-cbind(N_Set=n[, 3]+n[,4], N_Within=n[,4], Percent=round(100*n[,4]/length(gs), 1), Odds_Ratio=round(or, 3), P_HyperGeo=p, FDR=q, FWER=fwer);
-  stat<-stat[order(stat[, 'FDR']), , drop=FALSE];
+  stat<-cbind(N_Set=n[, 3]+n[,4], N_Within=n[,4], Percent=round(100*n[,4]/length(gs), 1), Odds_Ratio=round(or, 3), P_HyperGeo=p, FDR_BH=q, FWER=fwer);
+  stat<-stat[order(stat[, 'P_HyperGeo']), , drop=FALSE];
+  stat<-stat[stat[, 'P_HyperGeo']<=0.05, drop=FALSE];
   
   list(stat=stat, list=l0[rownames(stat)]);
 }
