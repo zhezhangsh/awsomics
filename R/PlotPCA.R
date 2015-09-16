@@ -205,9 +205,9 @@ PlotPCALegend<-function(device, settings, labels=as.vector(settings[,1])) {
   cex<-min(1.2, w0, h0); 
   cex<-cex*settings[,4]/max(settings[,4]);
   
-  points(rep(5, length(labels)), 100-(1:length(labels))*4.0*cex, col=as.vector(settings[,2]), pch=settings[,3], cex=1.5*cex);
+  points(rep(5, length(labels)), 100-(1:length(labels))*4.0*cex, col=as.vector(settings[,2]), pch=settings[,3], cex=1.75*cex);
   text(5+cex*5, 100-(1:length(labels))*4.0*cex, labels=as.vector(settings[,1]), adj=0, col=as.vector(settings[,2]), pch=settings[,3], cex=cex);
-  if (ncol(settings)>4) text(rep(5, length(labels)), 100-(1:length(labels))*4.0*cex/1.25, labels=as.vector(settings[,5]), col='white', cex=cex/1.5);
+  if (ncol(settings)>4) text(rep(5, length(labels)), 100-(1:length(labels))*4.0*cex, labels=as.vector(settings[,5]), col='white', cex=cex/1.5);
   
   #legend(0, 100, legend=labels, bty='n', col=as.vector(settings[,2]), text.col=as.vector(settings[,2]), pch=as.vector(settings[,3]), pt.cex=as.vector(settings[,4])*min(1.5, cex), cex=cex);
   if(names(device)!='quartz') capture.output(x<-dev.off(which=device));

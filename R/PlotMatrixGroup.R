@@ -29,7 +29,8 @@ PlotMatrixGroup<-function(d, grp, type, normalize=TRUE, color=GetColorTypes()[1]
         if (type == tp[3]) plotted<-PlotMatrixGroupBox(d, grp, color, normalize) else 
           if (type == tp[4]) plotted<-PlotMatrixGroupDensity(d, grp, color, normalize) else 
             if (type == tp[5]) plotted<-PlotMatrixGroupCumulative(d, grp, color, normalize) else 
-              plot(0, xaxt='n', yaxt='n', type='n', xlab='', ylab='', main=paste('Unknown plot type:', type)); 
+              #if (type == tp[6]) plotted<-PlotMatrixGroupLine(d, grp, color, normalize) else 
+                plot(0, xaxt='n', yaxt='n', type='n', xlab='', ylab='', main=paste('Unknown plot type:', type)); 
     
     out<-list(plot.type=type);
     out<-append(out, plotted);  
