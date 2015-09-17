@@ -5,6 +5,7 @@ export("CollectGwasDbData");
 export("ConnectToGwasDb");
 export("ConnectToVariantPositionDb");
 export("CountWordsFreq");
+export("CreateDatatable");
 export("GetColorPanelTypes");
 export("GetColors");
 export("GetColorTypes");
