@@ -1,3 +1,16 @@
+# Call the gplots::heatmap.2 function in a 'simple' way
+
+PlotHeatmap.2<-function(d, col='default', key=FALSE, trace='none', sepwidth=c(0,0), ...) {
+  
+  if (identical(col, 'default')) {
+    col<-gplots::colorpanel(128, 'blue', 'white', 'red');
+  }
+  
+  gplots::heatmap.2(d, col=col, key=key, trace=trace, sepwidth=sepwidth, ...);
+  
+}
+
+# More advanced heatmap plotting 
 PlotHeatmap<-function(d, reorder=TRUE, size.max=10, size.block=0.2, col.max='#FF0000', col.min='#00FF00', col.na='#EEEEEE', col.num=128, fn='', plot.new=TRUE) {
   
   if (is.null(colnames(d))) msize.right<-0; # if row or column names are not available, remove margin
