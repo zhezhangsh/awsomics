@@ -52,6 +52,7 @@ export("PlotVenn");
 export("ReformatMotifHits");
 export("RetrieveGadem");
 export("ReverseCompHits");
+export("RunGap");
 export("SearchGwasDbById");
 export("SearchGwasDbByLoci");
 export("SearchVariantPositionDbById");
