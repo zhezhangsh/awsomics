@@ -2,6 +2,7 @@
 AWSOMICS_HOME<-Sys.getenv("AWSOMICS_HOME");
 library(devtools);
 source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master//zhangawsomics/R/AnalyzeKeyword.R");
+source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master//zhangawsomics/R/ConvertFormat.R");
 source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master//zhangawsomics/R/CreateDatatable.R");
 source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master//zhangawsomics/R/FormatHtml.R");
 source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master//zhangawsomics/R/GetColors.R");

@@ -4,6 +4,7 @@ export("AddHref");
 export("CollectGwasDbData");
 export("ConnectToGwasDb");
 export("ConnectToVariantPositionDb");
+export("ConvertPdf2Png");
 export("CountWordsFreq");
 export("CreateDatatable");
 export("GetColorPanelTypes");
