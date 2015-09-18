@@ -3,7 +3,7 @@ print("starting server");
 shinyServer(function(input, output, session) {
   print("new visitor");
 
-  output$about <- renderUI({ includeHTML('index.html') })
+  #output$about <- renderUI({ includeHTML('index.html') })
   
   ########################################## "FPKM" tab ####################################################      
   fpkm.table<-reactive({

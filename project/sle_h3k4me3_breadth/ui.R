@@ -11,9 +11,9 @@ shinyUI(
     id="h3k4me3", collapsible = TRUE, title='H3K4me3 breadth',
     ############################################################################## 
     ################################# "About" tab ################################
-   tabPanel("About", h1('<Working version manuscript>'), uiOutput('about')),
+   #tabPanel("About", h1('<Working version manuscript>'), uiOutput('about')),
    #tabPanel("About", fluidRow(h1('<Working version manuscript>'), uiOutput('about'))),
-   
+   tabPanel("Home", id = 'tab.home', wellPanel(style = "background-color: #ffffff;", h4('<working version manuscript>'),  includeMarkdown('index.md'))), 
   ############################################################################### 
   ################################ "Data" menu ##################################     
   {

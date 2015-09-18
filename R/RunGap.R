@@ -18,9 +18,8 @@ RunGap<-function(d, k.max=ncol(d)-1, n.run=20, n.bootstrap=100, n.node=n.run) {
   }
   
   # all gap scores
-  gap<-do.call('cbind', gap);
+  gap<-Reduce('+', gap)/n.run;
   rownames(gap)<-1:k.max;
-  colnames(gap)<-paste('run', 1:n.run);
   
   gap;
 }
