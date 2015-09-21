@@ -42,8 +42,8 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
   rownames(gap)<-1:k.max;
   
   # Pick a k based on a few different rules (see maxSE function manual) 
-  mets <- eval(formals(maxSE)$method);
-  k<-sapply(n.se, function(se) sapply(mets, function(mt) maxSE(gap[, 3], gap[, 4], method=mt, SE.factor=se)));
+  mets <- eval(formals(cluster::maxSE)$method);
+  k<-sapply(n.se, function(se) sapply(mets, function(mt) cluster::maxSE(gap[, 3], gap[, 4], method=mt, SE.factor=se)));
   colnames(k)<-paste(n.se, 'xSE', sep='');
   rownames(k)<-mets;
   
