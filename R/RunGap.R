@@ -16,7 +16,7 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
   # clustering function
   if (identical(tolower(func[1]), 'kmeans')) fn<-kmeans else 
     if (identical(tolower(func[1]), 'pam')) fn<-function(x,k) list(cluster = pam(x,k, cluster.only=TRUE)) else 
-      if (identical(tolower(func[1]), 'hclust')) fn<-function(x,k) list(cluster = cutree(hclust(dist(scale(x))), k)) else 
+      if (identical(tolower(func[1]), 'hclust')) fn<-function(x,k) list(cluster = cutree(hclust(dist(x)), k)) else 
         fn<-func;
 
   # Gap core function, return gap statistics
@@ -63,7 +63,7 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
       text((1:nrow(gap))[ind1]-0.5, gap[ind1,3]+gap[ind1,4], pos=2*as.integer(gap[ind1,3]+gap[ind1,4]>0)+1, label='^', cex=1.25);
     if (gap[ind2, 3]>0 & ind2>1) {
       text((1:nrow(gap))[ind2]-0.5, gap[ind2,3]+gap[ind2,4], pos=2*as.integer(gap[ind2,3]+gap[ind2,4]>0)+1, label='+', cex=1.5);
-      legend(-.25, max(gap[,3]+gap[,4])+0.05, bty='n', pch=c('^', '+'), legend=c('Local maximum', 'Global maximum'), cex=1);
+      legend(-.25, max(gap[,3]+gap[,4])+0.125, bty='n', pch=c('^', '+'), legend=c('Local maximum', 'Global maximum'), cex=1);
     }
   }
   
