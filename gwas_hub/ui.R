@@ -2,7 +2,10 @@ print("loading UI");
 
 print(system.time(source("/zhangz/awsomics/gwas_hub/preload.R")));
 
-shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
+shinyUI(fluidPage(
+  tags$head(includeScript("google-analytics.js")),
+  
+  navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
                    
             ############################################################################## 
             ################################ "Search" tab ################################ 
@@ -151,6 +154,6 @@ shinyUI(navbarPage("GWAS Hub", collapsible = TRUE, title='GWAS Hub',
           
            
         ) # end of menu "Secondary analysis"    
-) ) # end of shinyUI
+))) # end of shinyUI
 
 

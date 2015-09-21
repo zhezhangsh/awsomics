@@ -5,15 +5,15 @@
 print("loading UI");
 print(system.time(source("/zhangz/awsomics/project/sle_h3k4me3_breadth/preload.R")));
 
-shinyUI(
+shinyUI(fluidPage(
+  tags$head(includeScript("google-analytics.js")),
   
   navbarPage(
     id="h3k4me3", collapsible = TRUE, title='H3K4me3 breadth',
     ############################################################################## 
     ################################# "About" tab ################################
-   #tabPanel("About", h1('<Working version manuscript>'), uiOutput('about')),
-   #tabPanel("About", fluidRow(h1('<Working version manuscript>'), uiOutput('about'))),
-   tabPanel("Home", id = 'tab.home', wellPanel(style = "background-color: #ffffff;", h4('<working version manuscript>'),  includeMarkdown('index.md'))), 
+    tabPanel("Home", id = 'tab.home', wellPanel(style = "background-color: #ffffff;", h4('<working version manuscript>'),
+                                               fluidRow(column(8, includeMarkdown('index.md'))))), 
   ############################################################################### 
   ################################ "Data" menu ##################################     
   {
@@ -189,6 +189,6 @@ shinyUI(
   )
   }
   ) # end of navbarPage
-) # end of shinyUI
+)) # end of shinyUI
 
 

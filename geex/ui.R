@@ -5,7 +5,8 @@
 print("loading UI");
 print(system.time(source("/zhangz/awsomics/geex/preload.R")));
 
-shinyUI(
+shinyUI(fluidPage(
+  tags$head(includeScript("google-analytics.js")),
   
   navbarPage(
     id="GeEx", collapsible = TRUE, title='GeEx',
@@ -372,10 +373,7 @@ shinyUI(
   ################################# "About" tab ################################
   # "About" tab
   tab.home<-tabPanel("About", id = 'tab.home',
-                     wellPanel(style = "background-color: #ffffff;", includeMarkdown('./intro.Rmd'))
-  )
+                     wellPanel(style = "background-color: #ffffff;", includeMarkdown('./intro.Rmd')))
   
   ) # end of navbarPage
-) # end of shinyUI
-
-
+)) # end of shinyUI
