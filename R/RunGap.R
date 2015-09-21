@@ -54,7 +54,7 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     plot(1:nrow(gap), gap[, 1], type='b', pch='O', cex=0.5, ylim=c(min(gap[,1:2]), max(gap[, 1:2])), xlab="Number of clusters (k)", ylab='Obs vs. Exp Log(Wk)', cex.lab=1.5);
     lines(1:nrow(gap), gap[, 2], type='b', pch='E', cex=0.5);
     
-    gplots::barplot2(gap[, 3], plot.ci=TRUE, ci.l=gap[,3]-gap[,4], ci.u=gap[,3]+gap[,4], space=0, ylim=c(min(gap[,1:2])-0.05, max(gap[, 1:2])+0.05), cex.lab=1.5, cex.sub=1.5, ylab='gap statistic', sub='Number of clusters k');
+    gplots::barplot2(gap[, 3], plot.ci=TRUE, ci.l=gap[,3]-gap[,4], ci.u=gap[,3]+gap[,4], space=0, ylim=c(min(gap[,3])-0.05, max(gap[, 3])+0.05), cex.lab=1.5, cex.sub=1.5, ylab='gap statistic', sub='Number of clusters k');
     ind1<-as.vector(which(diff(sign(diff(gap[,3])))==-2)+1);
     ind2<-which.max(gap[,3]);
     ind1<-setdiff(ind1, ind2);
