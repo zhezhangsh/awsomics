@@ -51,7 +51,7 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     par(mfrow=c(1, 2), mar=c(6, 5, 2, 2)); 
     
     
-    plot(1:nrow(gap), gap[, 1], type='b', pch='O', cex=0.5, ylim=c(min(gap[,1:2]), max(gap[, 1:2])), xlab="Number of clusters (k)", ylab='Obs vs. Exp Log(Wk)', cex.lab=1.5);
+    plot(1:nrow(gap), gap[, 1], type='b', pch='O', cex=0.5, ylim=c(min(gap[,1:2])-0.05, max(gap[, 1:2]))+0.05, xlab="Number of clusters (k)", ylab='Obs vs. Exp Log(Wk)', cex.lab=1.5);
     lines(1:nrow(gap), gap[, 2], type='b', pch='E', cex=0.5);
     
     gplots::barplot2(gap[, 3], plot.ci=TRUE, ci.l=gap[,3]-gap[,4], ci.u=gap[,3]+gap[,4], space=0, cex.lab=1.5, cex.sub=1.5, ylab='gap statistic', sub='Number of clusters k');
@@ -61,9 +61,9 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     ind1<-ind1[gap[ind1, 3]>0];
     if (length(ind1)>0) 
       text((1:nrow(gap))[ind1]-0.5, gap[ind1,3]+gap[ind1,4], pos=2*as.integer(gap[ind1,3]+gap[ind1,4]>0)+1, label='^', cex=1.25);
-    if (gap[ind2, 3]>0) {
+    if (gap[ind2, 3]>0 & ind2>1) {
       text((1:nrow(gap))[ind2]-0.5, gap[ind2,3]+gap[ind2,4], pos=2*as.integer(gap[ind2,3]+gap[ind2,4]>0)+1, label='+', cex=1.5);
-      legend(-.25, max(gap[,3]+gap[,4]), bty='n', pch=c('^', '+'), legend=c('Local maximum', 'Global maximum'), cex=1.25);
+      legend(-.25, max(gap[,3]+gap[,4]), bty='n', pch=c('^', '+'), legend=c('Local maximum', 'Global maximum'), cex=1);
     }
   }
   
