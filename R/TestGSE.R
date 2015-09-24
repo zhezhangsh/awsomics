@@ -36,13 +36,16 @@ TestGSE<-function(gs, u, coll, size.min=10, size.max=500, p.cutoff=0.05) {
   
   # prepare to run HyperGeometric test
   logP<-apply(n, 1, function(n) phyper(n[4]-1, n[3]+n[4], n[1]+n[2], n[2]+n[4], lower.tail=FALSE, log.p=TRUE));
-  p<-round(exp((ceiling(abs(logP))+logP)*log(10)), 2)*10^floor(logP);
+  #p<-round(exp((ceiling(abs(logP))+logP)*log(10)), 2)*10^floor(logP);
+  
+  p<-exp(logP);
+  p<-round(p, ceiling(abs(log10(p)))+2);
   
   q<-p.adjust(p, method='BH');
-  q<-round(exp((ceiling(abs(log10(q)))+log10(q))*log(10)), 2)*10^floor(log10(q));
+  q<-round(q, ceiling(abs(log10(q)))+2);
   
   fwer<-p.adjust(p, method='bonferroni');
-  fwer<-round(exp((ceiling(abs(log10(fwer)))+log10(fwer))*log(10)), 2)*10^floor(log10(fwer));
+  fwer<-round(fwer, ceiling(abs(log10(fwer)))+2);
   
   stat<-cbind(N_Set=n[, 3]+n[,4], N_Within=n[,4], Percent=round(100*n[,4]/length(gs), 1), Odds_Ratio=round(or, 3), P_HyperGeo=p, FDR_BH=q, FWER=fwer);
   stat<-stat[order(stat[, 'P_HyperGeo']), , drop=FALSE];
