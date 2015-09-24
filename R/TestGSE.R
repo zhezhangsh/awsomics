@@ -48,5 +48,5 @@ TestGSE<-function(gs, u, coll, size.min=10, size.max=500, p.cutoff=0.05) {
   stat<-stat[order(stat[, 'P_HyperGeo']), , drop=FALSE];
   stat<-stat[stat[, 'P_HyperGeo']<=0.05, , drop=FALSE];
   
-  list(stat=stat, list=l0[rownames(stat)]);
+  list(stat=stat, list=l0[rownames(stat)], size=n);
 }
