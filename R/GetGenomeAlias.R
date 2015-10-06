@@ -12,7 +12,7 @@ GetGenomeAlias<-function(alias, type=c('code', 'short', 'taxid', 'ucsc', 'name',
   
   GENOMES<-rbind(
     c('hsa', '9606', 'taxid'),
-    c('hsa', 'hg19', 'ucsc'),
+    c('hsa', 'hg38', 'ucsc'),
     c('hsa', 'Homo sapiens', 'official'),
     c('hsa', 'hsa', 'code'),
     c('hsa', 'Human', 'name'),
