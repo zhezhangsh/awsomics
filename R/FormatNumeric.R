@@ -5,7 +5,7 @@ FormatNumeric<-function(tbl, digit=4) {
     if (is.numeric(x)) {
       x<-as.vector(x); 
       if (!identical(round(x), x)) {
-        if (max(abs(x))>1) x<-round(x, digit) else {
+        if (max(abs(x), na.rm=TRUE)>1) x<-round(x, digit) else {
           y<-sign(x);
           a<-floor(log10(abs(x)));
           z<-round(abs(x)/10^a, 1);

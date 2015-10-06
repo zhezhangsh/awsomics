@@ -18,6 +18,6 @@ if (length(fn)>0) {
 }
 
 # Loading function script
-ln<-c(paste('AWSOMICS_HOME<-Sys.getenv("AWSOMICS_HOME");', sep=''), 'library(devtools);');
-ln<-c(ln, paste('source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master/', sub('./', '', fn), '");', sep=''));
-writeLines(c('', ln, ''), file(paste(Sys.getenv('AWSOMICS_HOME'), 'load_by_url.r', sep='/')));
+#ln<-c(paste('AWSOMICS_HOME<-Sys.getenv("AWSOMICS_HOME");', sep=''), 'library(devtools);');
+#ln<-c(ln, paste('source_url("https://raw.githubusercontent.com/zhezhangsh/rchive/master/', sub('./', '', fn), '");', sep=''));
+#writeLines(c('', ln, ''), file(paste(Sys.getenv('AWSOMICS_HOME'), 'load_by_url.r', sep='/')));
