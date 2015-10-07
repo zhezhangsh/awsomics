@@ -9,7 +9,9 @@ FormatNumeric<-function(tbl, digit=4) {
           y<-sign(x);
           a<-floor(log10(abs(x)));
           z<-round(abs(x)/10^a, 1);
-          x<-y*z*10^a;
+          v<-y*z*10^a;
+          v[x==0]<-0;
+          x<-v;
         }
       }
     tbl[, i]<-x;
