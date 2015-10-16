@@ -52,6 +52,7 @@ export("PlotPCALegend");
 export("PlotQqFromP");
 export("PlotQqFromPhred");
 export("PlotVenn");
+export("PlotVenn3Way");
 export("ReformatMotifHits");
 export("RetrieveGadem");
 export("ReverseCompHits");
