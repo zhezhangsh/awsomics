@@ -51,8 +51,8 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     par(mfrow=c(1, 2), mar=c(6, 5, 2, 2)); 
     
     
-    plot(1:nrow(gap), gap[, 1], type='b', pch='O', cex=0.5, ylim=c(min(gap[,1:2]), max(gap[, 1:2])), xlab="Number of clusters (k)", ylab='Obs vs. Exp Log(Wk)', cex.lab=1.5);
-    lines(1:nrow(gap), gap[, 2], type='b', pch='E', cex=0.5);
+    plot(1:nrow(gap), gap[, 1], type='b', pch='O', cex=0.3, col='#FF8888', ylim=c(min(gap[,1:2]), max(gap[, 1:2])), xlab="Number of clusters (k)", ylab='Obs vs. Exp Log(Wk)', cex.lab=1.5);
+    lines(1:nrow(gap), gap[, 2], type='b', pch='E', cex=0.3, col='#8888FF');
     
     ind1<-as.vector(which(diff(sign(diff(gap[,3])))==-2)+1);
     ind2<-which.max(gap[,3]);
