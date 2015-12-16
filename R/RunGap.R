@@ -62,7 +62,8 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     col<-rep('#888888', nrow(gap));
     col[ind1]<-'#8888FF';
     col[ind2]<-'#FF8888';
-    gplots::barplot2(gap[, 3], plot.ci=TRUE, ci.l=gap[,3]-gap[,4], ci.u=gap[,3]+gap[,4], border=NA, col=col, space=0, cex.lab=1.5, cex.sub=1.5, ylab='gap statistic', sub='Number of clusters k');
+    gplots::barplot2(gap[, 3], plot.ci=TRUE, ci.l=gap[,3]-gap[,4], ci.u=gap[,3]+gap[,4], border='darkgrey', col=col, space=0, cex.lab=1.5, cex.sub=1.5, ylab='gap statistic', sub='Number of clusters k');
+    abline(h=0); 
     
     #if (length(ind1)>0) 
     #  text((1:nrow(gap))[ind1]-0.5, 0, pos=2*as.integer(gap[ind1,3]+gap[ind1,4]>0)+1, label='^', cex=1, col='blue');
