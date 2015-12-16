@@ -68,7 +68,7 @@ RunGap<-function(x, func=c('kmeans', 'pam', 'hclust'), k.max=ncol(x)-1, make.plo
     #  text((1:nrow(gap))[ind1]-0.5, 0, pos=2*as.integer(gap[ind1,3]+gap[ind1,4]>0)+1, label='^', cex=1, col='blue');
     if (gap[ind2, 3]>0 & ind2>1) {
       #text((1:nrow(gap))[ind2]-0.5, 0, pos=2*as.integer(gap[ind2,3]+gap[ind2,4]>0)+1, label='+', cex=1, col='red');
-      legend(-.25, max(gap[,3]+gap[,4])+0.05, bty='n', pch=c('^', '+'), col=c('blue', 'red'), legend=c('Local maximum', 'Global maximum'), cex=0.75);
+      legend(-.25, max(gap[,3]+gap[,4])+0.05, bty='n', pch=15, col=c('#8888FF', '#FF8888'), legend=c('Local maximum', 'Global maximum'), cex=0.75);
     }
   }
   
