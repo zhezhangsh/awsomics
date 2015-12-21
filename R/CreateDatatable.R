@@ -11,13 +11,7 @@ CreateDatatable<-function(t, fn, format=TRUE, rownames=TRUE, caption='', selecti
   if (rownames) t<-cbind(ID=rownames(t), t); 
   if (format) awsomics::FormatNumeric(t, digit=4);
 
-  pg<-DT::datatable(t, options=list("pageLength"=50, 
-    ajax = list(
-    serverSide = object.size(t)>10^5, 
-    processing = TRUE,
-    url = 'http://datatables.net/examples/server_side/scripts/jsonp.php',
-    dataType = 'jsonp'
-  )), rownames=FALSE, caption=caption, selection=selection, filter='bottom', escape=FALSE, ...);
+  pg<-DT::datatable(t, options=list("pageLength"=50, server=TRUE), rownames=FALSE, caption=caption, selection=selection, filter='bottom', escape=FALSE, ...);
   htmlwidgets::saveWidget(pg, fn, selfcontained = FALSE);
   
   fn;                  
