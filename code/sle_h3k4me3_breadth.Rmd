@@ -1,0 +1,824 @@
+---
+title: "H3K4me3 breadth is associated with modified gene transcription in  systemic lupus erythematosus"
+author: "Jim Zhang"
+date: "September 9, 2015"
+output:
+  html_document:
+    fig_caption: yes
+    toc: yes
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE, dpi=300, fig.pos="H", fig.width=8, fig.height=6, fig.path='../results/figures/', echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r global_variable, include=FALSE}
+library(gplots);
+
+# Path to project home
+path<-"/nas/is1/zhangz/projects/sullivan/2015-09_H3K4me3_breadth";
+path.data<-paste(path, 'R', sep='/'); # path to R objects
+path.result<-paste(path, 'results', sep='/'); # path to outputs
+path.figure<-paste(path.result, 'figures', sep='/'); # path to figues
+
+fig.count<-0; # Order of figures
+tbl.count<-1; # Order of tables
+
+###############################################################
+# Set to TRUE for the final run
+rerun.all<-FALSE; # re-generate all files
+###############################################################
+
+# Index to upstream, TSS, downstream regionsd
+indexes<-list(TSS=96:106, Upstream=91:93, Downstream=113:115);
+
+# Cutoff of H3K4me3 peak height to be selected for further analysis
+#cutoff was seletec based on a bimodal distribution of average H3K4me3 within [-250bp, 250bp] of TSSs
+min.peak<-0.5;
+
+title<-c('Narrow Peak', 'Upstream Extended', 'Downstream Extended', 'Broad Symmetric', 'Unclassified', 'No H3K4me3');
+
+##################################
+##################################
+# Make bimodal models on both sites of the TSSs
+makeModel<-function(cov, index.head, index.shoulder, nm, path) {
+  # cov             Depth matrix
+  # index.head      Column index of head
+  # index.shoulder  Column index of shouder
+  # nm              Shoulder name
+  
+  # head-shoulder difference
+  m0<-rowMeans(cov[, index.head]);
+  m1<-rowMeans(cov[, index.shoulder]);
+  dff<-m1-m0;
+  
+  # Plot shoulder to head ratio
+  dens<-density(dff);
+  ind<-which(dens$y>0.001)
+  pdf(paste(path, '/results/figures/', 'should2head_', nm, '.pdf', sep=''), w=6, h=3.6);
+  par(mar=c(5,5,3,2));
+  plot(dens, xlim=c(dens$x[min(ind)], dens$x[max(ind)]), xlab='Shoulder-to-head ratio', ylab='Density', cex.lab=1, main=paste('H3K4me3 change at distal sites,', nm));
+  dev.off();
+  
+  # fit to bimodal model
+  library(mixtools);
+  mdl<-normalmixEM(dff);
+  pdf(paste(path, '/results/figures/', 'shoulder2head_fitted_', nm, '.pdf', sep=''), w=6, h=3.6);
+  par(mar=c(5,5,3,2));  
+  plot(mdl, 2);
+  lines(dens, col=4);
+  dev.off();
+
+  cls<-classify(mdl, dff);
+  
+  list(Model=mdl, Classes=cls);
+}
+
+##################################
+##################################
+# classify by model
+classify<-function(mdl, d, nsd=2) {
+  lo<-mdl$mu[1]+nsd*mdl$sigma[1];
+  hi<-mdl$mu[2]-nsd*mdl$sigma[2];
+  
+  broad<-names(d)[d>=lo]; # select broad peaks
+  narrow<-names(d)[d<=hi]; # select narrow peaks
+  cls<-list(Narrow=narrow, Broad=broad, Unclassified=setdiff(names(d), c(broad, narrow)));
+  
+  cls;
+}
+
+##################################
+##################################
+# The working horse function to classify sites
+categorizeSites<-function(cov, indexes, nm, path, threshold=1, nperm=100, heatmap=TRUE) {
+  # cov             Depth matrix
+  # indexes         Column index of head and both shoulders, as a list of 3 integer vectors
+  # nm              data set name
+  # path            Path to output files
+  # threshold       Minimal depth at TSS
+  
+  library(gplots);
+  
+  c<-cov[rowMeans(cov[, indexes[[1]], drop=FALSE])>threshold, ,drop=FALSE];
+    
+  # Run modeling
+  out1<-makeModel(c, indexes[[1]], indexes[[2]], paste(nm, '_Upstream', sep=''), path); # Upstream
+  out2<-makeModel(c, indexes[[1]], indexes[[3]], paste(nm, '_Downstream', sep=''), path); # Upstream
+  
+  grps<-c(out1[[2]][1:2], out2[[2]][1:2]);
+  seeds<-list("Narrow"=intersect(grps[[1]], grps[[3]]), 'Upstream'= setdiff(grps[[2]], grps[[4]]), 'Downstream' = setdiff(grps[[4]], grps[[2]]), 'Both'=intersect(grps[[2]], grps[[4]]));
+  
+  # Run a recursive procedure to re-classify sites until converge
+  s1<-seeds[-length(seeds)];
+  s0<-list();
+  loop<-0;
+  while(!identical(s0, s1) & loop<nperm) {
+    loop<-loop+1;
+    print(loop);
+    ms<-sapply(s1, function(s) colMeans(cov[s, ]));
+    r<-cor(t(c), ms);
+    r[is.na(r)]<-0;
+    ind<-apply(r, 1, function(r) which(r==max(r))[1]);
+    mx<-apply(r, 1, max);
+    dff<-mx - apply(r, 1, function(r) sort(r)[3]);
+    s0<-s1;
+    s1<-lapply(1:4, function(i) rownames(c)[ind==i & mx>=0.95 & dff/(1-mx)>1]);
+  }
+  
+  # final sets 
+  if (nperm<=0) sets<-seeds else {
+    ms<-sapply(s1, function(s) colMeans(cov[s, ]));
+    rng<-min(indexes[[2]]-20):max(indexes[[3]]+20);
+    r<-cor(t(c[, rng]), ms[rng, ]);
+    sets<-lapply(1:4, function(i) rownames(c)[ind==i & mx>=0.9]);
+    names(sets)<-names(seeds);
+  }
+  sets$Unclassified<-setdiff(rownames(c), unlist(sets, use.names=FALSE));
+  
+  # Plot average depth of all sets
+  fn<-paste(path, '/results/figures/Pattern_Depth_', nm, '.pdf', sep='');
+  pdf(fn, w=6, h=9.6);
+  par(mar=c(2, 2, 2, 2), omi=c(1, 1, 0, 0), mfrow=c(4,1));
+  title<-c('Narrow Peak', 'Upstream Extended', 'Downstream Extended', 'Broad Symmetric', 'Unclassified');
+  for (i in 1:4) {
+    plot(seq(-2500, 2500, 50), colMeans(c[sets[[i]], 51:151]), type='n', ylab='', xlab='', yaxs='i', xaxs='i', ylim=c(0, max(c)), main=title[i], cex.main=2);
+    polygon(c(-2500, seq(-2500, 2500, 50), 2500), c(0, colMeans(c[sets[[i]], 51:151]), 0), border=NA, col='lightgrey');
+    lines(seq(-2500, 2500, 50), colMeans(c[sets[[i]], 51:151]), lwd=2, col='darkgrey');
+    abline(v=c(-500, 0, 700), lty=2, col='grey');
+  }
+  title(xlab='Distance to TSS (bp)', ylab='Average depth', outer=TRUE, cex.lab=3);
+  dev.off();
+  fn.pattern.depth<-pdf2png(fn, rerun.all);
+  
+  # Plot heatmaps
+  col<-c("#0000FF", "#0000FF", "#4040FF", "#7070FF", "#8888FF", "#A9A9FF", "#D5D5FF", "#EEE5EE", "#FFAADA", "#FF9DB0", "#FF7080", "#FF5A5A", "#FF4040", "#FF0D1D", "#FF0000");
+  if (heatmap) {
+    for (i in 1:4) {
+      d<-cov[sets[[i]], 61:141];
+      ht<-heatmap(d, scale='none', Colv=NA);
+      d<-d[ht[[1]], ]; # sort rows
+      
+      pdf(paste(path, '/results/figures/Heatmap_', nm, '_', names(sets)[i], '.pdf', sep=''), w=6, h=8);
+      par(mar=c(5,5,3,2));
+      image(t(d), col=col, axes=FALSE, xlab='Distance to TSS (bp)', ylab='Transcription start sites', main=names(sets)[i], cex.lab=2, cex.main=2);
+      axis(1, at=seq(0, 1, 0.25), seq(-1000, 1000, 500));
+      abline(v=0.5, col='#22222222', lwd=2);
+      dev.off();
+    }
+  }
+ 
+  # Plot bar plots
+  ms<-sapply(indexes, function(ind) sapply(sets, function(st) mean(cov[st, ind])))[, c(2, 1, 3)];
+  se<-sapply(indexes, function(ind) sapply(sets, function(st) sd(cov[st, ind])/sqrt(length(st))))[, c(2, 1, 3)];
+  pdf(paste(path, '/results/figures/Barplot_average_depth_', nm, '.pdf', sep=''), w=8, h=6);
+  par(mar=c(5,5,2,2));
+  barplot2(ms, be=T, plot.ci=TRUE, ci.u=ms+se, ci.l=ms-se, names=c('Upstream', 'TSS', 'Downstream'), ylab='Average depth', 
+           cex.lab=2, cex.names=2, yaxs='i', ylim=c(0, 1.05*max(ms+se)), legend=title[1:5], col=rainbow(nrow(ms)));
+  dev.off();
+  
+  list(models=list(Up=out1, Down=out2), sets=sets, seeds=seeds, png=fn.pattern.depth);
+}
+
+##################################
+##################################
+# Make a plot to show the H3K4me3-transcription correlation at 3 different regions
+plotDeltaDelta<-function(l2r, global.mean=0, names, fn='', main='', legend=FALSE, regions=c('TSS', 'Upstream', 'Downstream'), xlab='Minimal H3K4me3 change in SLE (%)', ylab='Average transcription change (%)') {
+  
+  if (is.character(fn) & fn!='') pdf(fn, w=8, h=6);
+  
+  par(mar=c(1,1,3,2));
+  
+  global.mean<-100*(exp(global.mean*log(2))-1);
+  
+  m<-sapply(l2r, function(x) sapply(x, mean));
+  se<-sapply(l2r, function(x) sapply(x, function(x) sd(x)/sqrt(length(x))));
+  
+  u<-100*(exp((m+se)*log(2))-1);
+  l<-100*(exp((m-se)*log(2))-1);
+  m<-100*(exp(m*log(2))-1);
+  
+  ylim.max<-1.2*max(0, max(m, nar.rm=TRUE), global.mean, na.rm=TRUE);
+  ylim.min<-1.2*min(0, min(m, na.rm=TRUE), global.mean, na.rm=TRUE);
+  plot(0, type='n', xlab=xlab, ylab=ylab, cex.lab=2, xaxt='n', xlim=c(0, 20), ylim=c(ylim.min, ylim.max), xaxs='i', yaxs='i');
+  abline(h=global.mean, lwd=2, col='#88888888');
+  text(14.5, global.mean, pos=3, label=paste('Average change of all genes =', round(global.mean, 1), '%', sep=''), cex=1);
+  rect(0:(nrow(m)-1)-0.15, ylim.min, 0:(nrow(m)-1)+0.15, ylim.max, border=NA, col='#88888822')
+  for (i in 1:3) {
+    adj<-0.05*(i-2);
+    ind<-nrow(m)-1;
+    lines((0:ind)[!is.na(m[,i])], m[!is.na(m[,i]),i], lwd=.5, col=rainbow(ncol(m))[i]);
+    points(adj+(0:ind)[!is.na(m[,i])], m[!is.na(m[,i]),i], pch=19-i, cex=1.5, col=sub('FF$', '88', rainbow(ncol(m))[i]));
+    for (j in (0:ind)[!is.na(m[,i])]) arrows(adj+j, m[j+1, i], adj+j, u[j+1, i], angle=90, col=sub('FF$', 'DD', rainbow(ncol(m))[i]), length=0.025);
+    for (j in (0:ind)[!is.na(m[,i])]) arrows(adj+j, m[j+1, i], adj+j, l[j+1, i], angle=90, col=sub('FF$', 'DD', rainbow(ncol(m))[i]), length=0.025);
+  }
+  axis(1, at=0:(nrow(m)-1), label=names, las=3);
+  title(main=main, cex.main=2);
+  if (abs(ylim.min) > abs(ylim.max)) y<-ylim.min+(ylim.max-ylim.min)/3 else y<-ylim.max*0.9;
+  #legend(0,  y, bty='n', col=rainbow(ncol(m)), pch=19-(1:3), legend=c('TSS', 'Upstream', 'Downstream'), cex=2);
+  if (legend) legend(0,  120, bty='n', col=sub('FF$', '88', rainbow(ncol(m))), pch=19-(1:3), legend=c('TSS', 'Upstream', 'Downstream'), cex=2);
+  
+  if (is.character(fn) & fn!='') dev.off();
+}
+
+##################################
+##################################
+pdf2png<-function(fn, cvt=FALSE) { # fn: pdf file name
+  fn.png<-sub('.pdf$', '.png', fn, ignore.case = TRUE);
+  if (cvt | !file.exists(fn.png)) system(paste('convert -density 150 -resize 80%', fn, fn.png));
+  fn.png;
+}
+```
+
+```{r load_data, include=FALSE}
+library(GenomicRanges);
+
+# We previously processed the ChIP-seq data of H3K4me3 from the primary monocytes of 6 healthy controls and 6 SLE patients. This analysis is focused on the [-5kb, 5kb] regions around 27,588 known TSS.
+tss<-eval(parse(text=load(paste(path.data, "anno_tss.rdata", sep='/')))); # location of unique TSSs
+tss.id<-names(tss);
+
+# The ChIP-seq sequencing depth has been processed and normalized to background as what's described in our previous paper. Within the 10kb regions around TSSs, the depth of samples in the same group was averaged into 50bp bins and the resultant data is two 27,588 X 201 matrix for the control and SLE groups.
+cov10k<-eval(parse(text=load(paste(path.data, "Cov_TSS_10k.rdata", sep='/'))));
+n<-apply(cov10k[[1]][, 51:151], 1, function(c) length(c[c==0])) + apply(cov10k[[2]][, 51:151], 1, function(c) length(c[c==0])); # number of missing values
+cov10k<-lapply(cov10k, function(c) c[n<50, ]); # remove TSS with too many missing values
+names(cov10k)[1:2]<-c('Ctrl', 'SLE')
+cov0<-cov10k[[1]];
+cov1<-cov10k[[2]];
+
+cov14<-eval(parse(text=load(paste(path.data, "Cov_TSS_10k_CD14.rdata", sep='/'))));
+cov10k.cd14<-cov14$H3k4me3;
+cov.cd14<-cov10k.cd14[rownames(cov0), ];
+
+tss<-tss[rownames(cov0)]; # qualified set of TSS for further analysis
+
+# Mean depth by position
+m0<-colMeans(cov0); # Average depth around TSS; controls
+m1<-colMeans(cov1); # Average depth around TSS; patients
+
+# We also previously obtained the RNA-seq data from the same sample cohort and the results of differential gene expression. These results can be used to evaluate the impact of peak breadth on gene expression.
+stat<-eval(parse(text=load(paste(path.data, "stat_RNA.rdata", sep='/'))));
+expr<-eval(parse(text=load(paste(path.data, "expr.rdata", sep='/'))));
+e0<-expr[, 10:17];
+e1<-expr[, 1:9];
+e<-list(Control=e0, SLE=e1); 
+
+# lists of differentially expressed genes
+deg<-stat[stat[,8]<=0.01, ];
+deg<-list("Expr_Up"=rownames(deg[deg[,6]>0, ]), "Expr_Down"=rownames(deg[deg[,6]<0, ]));
+deg.cmm<-intersect(deg[[1]], deg[[2]]); # DEG appeared in both lists
+if (length(deg.cmm)>0) deg<-lapply(deg, function(d) d[!(d %in% deg.cmm)]);
+deg.tss<-lapply(deg, function(deg) names(tss)[tss$Gene %in% deg]); # TSS of differentially expressed genes
+```
+
+```{r global_pattern, include=FALSE}
+# Plot global pattern
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'global_average.pdf', sep='/');
+pdf(fn, w=10, h=3.6);
+par(mar=c(5,5,3,2));
+plot(seq(-5000, 5000, 50), m0, type='l', ylim=c(0, 1.05*max(m0)), yaxs='i', xaxs='i', xlab='Distance to TSS (bp)', ylab='Average depth', cex.lab=2, main='Average H3K4me3 around TSS', cex.main=2);
+rect(-250, 0, 250, 1.1*max(m0), border=NA, col='#33333333'); 
+rect(600, 0, 700, 1.1*max(m0), border=NA, col='#00008833'); 
+rect(-500, 0, -400, 1.1*max(m0), border=NA, col='#00008833'); 
+text(0, max(m0), label='[-250, 250]', cex=.5);
+text(-500, 0.5*max(m0), pos=2, label='[-500, -400]', cex=.5);
+text(700, 0.5*max(m0), pos=4, label='[600, 700]', cex=.5);
+dev.off();
+fn.global.pattern<-pdf2png(fn, rerun.all);
+```
+![](`r fn.global.pattern`) 
+
+**Figure `r fig.count`. Average H3K4me3 at regions around all TSSs.** Average H3K4me3 peaked within the core promoter regions (-250bp to +250bp around TSS).  The average H3K4me3 was reduced by 50% at ~450bp upstream and ~650bp downstream of TSSs. 
+
+``` {r tss_bimodal, include=FALSE}
+# Plot bimodal distribution
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'tss_bimodal.pdf', sep='/');
+pdf(fn, w=6, h=4);
+ind<-indexes[[1]];
+dens<-density(rowMeans(cov0[, ind]));
+mdl<-mixtools::normalmixEM(rowMeans(cov0[, ind]));
+mixtools::plot.mixEM(mdl, 2, xlab2='Average H3K4me3 at TSS', ylab2='Density', main2='Bimodal distribution of TSS H3K4me3');
+lines(dens, col=4);  
+dev.off();  
+fn.bimodal<-pdf2png(fn, rerun.all);
+```
+![](`r fn.bimodal`) 
+
+**Figure `r fig.count`. H3K4me3 at all TSSs has a bimodal distribution.** The left peak was composed of random values obtained from non-H3K4me3 sites while the right peak corresponds to various levels of H3K4me3 at the other sites. 
+
+```{r classify_site, eval=FALSE, include=FALSE}
+sets0<-categorizeSites(cov0, indexes, 'Ctrl', path, threshold=min.peak, nperm=0, heatmap=TRUE); 
+sets0$sets$"No H3K4me3"<-setdiff(rownames(cov0), unlist(sets0));
+sets1<-categorizeSites(cov1, indexes, 'SLE', path, threshold=min.peak, nperm=0, heatmap=TRUE);
+sets1$sets$"No H3K4me3"<-setdiff(rownames(cov1), unlist(sets1));
+
+out<-list(Ctrl=sets0, SLE=sets1);
+sets<-lapply(out, function(out) out$sets);
+
+# Classify using ENCODE CD 14 data
+sets.cd14<-categorizeSites(cov.cd14, indexes, 'CD14', path, threshold=min.peak, nperm=0, heatmap=TRUE); 
+sets.cd14<-sets.cd14$sets;
+sets.cd14$"No H3K4me3"<-setdiff(rownames(cov.cd14), unlist(sets.cd14));
+sets$CD14<-sets.cd14;
+names(sets)<-c('Control', 'SLE', 'CD14');
+
+# map TSS to gene
+gn.id<-lapply(sets, function(sets) lapply(sets, function(s) unique(as.vector(tss[s]$ID)))); # TSS id to gene id
+gn.nm<-lapply(sets, function(sets) lapply(sets, function(s) unique(as.vector(tss[s]$Gene)))); # TSS id to gene name
+gn.id<-lapply(gn.id, function(x) lapply(x, function(x) x[!is.na(x)]));
+gn.nm<-lapply(gn.nm, function(x) lapply(x, function(x) x[!is.na(x)]));
+
+# remove ambiguity
+gn.id<-lapply(gn.id, function(gn) {
+  nm<-names(gn);
+  all<-unlist(gn);
+  gn<-lapply(1:length(gn), function(i) setdiff(gn[[i]], unlist(gn[-i]))); 
+  gn[[length(gn)]]<-setdiff(all, unlist(gn[-length(gn)]));
+  names(gn)<-nm;
+  gn;
+})
+gn.nm<-lapply(gn.nm, function(gn) {
+  nm<-names(gn);
+  all<-unlist(gn);
+  gn<-lapply(1:length(gn), function(i) setdiff(gn[[i]], unlist(gn[-i]))); 
+  gn[[length(gn)]]<-setdiff(all, unlist(gn[-length(gn)]));
+  names(gn)<-nm;
+  gn;
+});
+
+ss<-list(Control=sets0, SLE=sets1, CD14=sets.cd14);
+
+saveRDS(sets, file=paste(path.data, 'TSS_classified.rds', sep='/'));
+saveRDS(ss, file=paste(path.data, 'TSS_classified_sets.rds', sep='/'))
+saveRDS(gn.nm, file=paste(path.data, 'gene_classified.rds', sep='/'));
+saveRDS(gn.id, file=paste(path.data, 'gene_classified_id.rds', sep='/'));
+```
+
+```{r plot_classified, include=FALSE}
+sets<-readRDS(file=paste(path.data, 'TSS_classified.rds', sep='/'));
+gn.nm<-readRDS(file=paste(path.data, 'gene_classified.rds', sep='/'));
+gn.id<-readRDS(file=paste(path.data, 'gene_classified_id.rds', sep='/'));
+ss<-readRDS(paste(path.data, 'TSS_classified_sets.rds', sep='/'));
+sets0<-ss[[1]];
+sets1<-ss[[2]];
+sets.cd14<-ss[[3]]; 
+
+sets.n<-sapply(sets, function(s) sapply(s, length));
+
+# Classification agreement
+cl<-lapply(sets, function(s) lapply(names(s), function(tp) {
+  c<-rep(tp, length(s[[tp]]));
+  names(c)<-s[[tp]];
+  c;
+}));
+cl<-lapply(cl, function(cl) do.call('c', cl));
+cl<-sapply(cl, function(cl) cl[names(tss)]);
+
+fig.count<-fig.count+1;
+```
+![](`r sets0$png`) 
+
+**Figure `r fig.count`. Average depth of different H3K4me3 patterns around TSS.** Four patterns of H3K4me3 were defined: Narrow Peak, Upstream Extended, Downstream Extended, and Broad Peak.
+
+```{r example_tdp2, include=FALSE}
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'example_TDP2.pdf', sep='/');
+pdf(fn, w=6, h=8);
+par(mar=c(1, 5, 1, 2), omi=c(1, 0, 0.6, 0), mfrow=c(2, 1));
+
+plot(seq(-2500, 2500, 50), smooth(cov0['chr6_24667115', ])[51:151], col='darkgrey', lwd=2, type='l', xaxs='i', yaxs='i', ylim=c(0, 2), ylab='Normalized depth (absolute)', cex.lab=1.5); 
+lines(seq(-2500, 2500, 50), smooth(cov1['chr6_24667115', ])[51:151], col='darkblue', lwd=2); 
+abline(v=c(-500, 0, 700), lty=2, col='grey');
+legend(-2500, 2, bty='n', lwd=3, col=c('darkgrey', 'darkblue'), legend=c('Control', 'SLE'));
+box();
+
+plot(seq(-2500, 2500, 50), smooth(cov1['chr6_24667115', ]-cov0['chr6_24667115', ])[51:151], col='darkgrey', lwd=2, type='n', xaxs='i', yaxs='i', ylim=c(0, .5), ylab='Depth difference (relative)', cex.lab=1.5); 
+polygon(c(-2500, seq(-2500, 2500, 50), 2500), c(0, smooth(cov1['chr6_24667115', ]-cov0['chr6_24667115', ])[51:151], 0), border=NA, col='lightgrey');
+lines(seq(-2500, 2500, 50), smooth(cov1['chr6_24667115', ]-cov0['chr6_24667115', ])[51:151], lwd=2, col='darkgrey');
+abline(v=c(-500, 0, 700), lty=2, col='grey');
+box();
+
+title(xlab='Distance to TSS (bp)', cex.lab=2, outer=TRUE, main='H3K4me3 of gene TDP2', cex.main=2)
+
+dev.off();
+fn.tdp2<-pdf2png(fn, rerun.all);
+```
+![](`r fn.tdp2`) 
+
+**Figure `r fig.count`.** TDP2 protein interacts with key immune response regulators such as TNF and NFKB. Its expression level was approximately doubled (p = 0.004) in SLE according to our RNA-seq data. TDP2 has high baseline level of H3K4me3 at its TSS in controls (top 2%). In SLE, the increase of H3K4me3 happened at downstream of TSS, but not at TSS itself. The downstream change of H3K4me3 looks much more prominent when the relative difference of controls and SLE patients instead. 
+
+```{r h3k27me3, include=FALSE}
+cov27.0<-cov10k[[3]][rownames(cov0), ];
+cov27.1<-cov10k[[4]][rownames(cov0), ];
+cnm<-names(indexes)[c(2, 1, 3)];
+m27.0<-sapply(cnm, function(cnm) rowMeans(cov27.0[, indexes[[cnm]]]));
+m27.1<-sapply(cnm, function(cnm) rowMeans(cov27.1[, indexes[[cnm]]]));
+
+# Plot average depth of all sets
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'Pattern_Depth_H3K27me3.pdf', sep='/');
+pdf(fn, w=6, h=9.6);
+par(mar=c(2, 2, 2, 2), omi=c(1, 1, 0, 0), mfrow=c(4,1));
+m27<-sapply(1:4, function(i) colMeans(cov27.0[sets[[1]][[i]], 51:151]));
+for (i in 1:4) {
+  plot(seq(-2500, 2500, 50), m27[, i], type='n', ylab='', xlab='', yaxs='i', xaxs='i', ylim=c(min(m27)-0.05, max(m27)+0.05), main=paste(names(sets[[1]])[i], 'H3K4me3'), cex.main=2);
+  polygon(c(-2500, seq(-2500, 2500, 50), 2500), c(0, m27[, i], 0), border=NA, col='lightgrey');
+  abline(v=c(-500, 0, 700), lty=2, col='grey');
+}
+title(xlab='Distance to TSS (bp)', ylab='Average depth', outer=TRUE, cex.lab=3);
+dev.off();
+fn.pattern.h3k27me3<-pdf2png(fn, rerun.all);
+```
+![](`r fn.pattern.h3k27me3`) 
+
+**Figure `r fig.count`. Average depth of H3K27me3 of four H3K4me3 patterns around TSS.** The four groups of TSS having different H3K4me3 patterns also showed distintive H3K27me3 patterns. Also suggested is the complex dynamics of histone modifications around TSSs.
+
+```{r cd14_pattern, include=FALSE}
+c14<-lapply(sets[[1]], function(s) sapply(cov14, function(c) colMeans(c[s, 51:151])));
+
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'cd14_pattern.pdf', sep='/');
+pdf(fn, w=7.5, h=10);
+par(mfcol=c(12, 6), mar=c(.1,.1,.1,.1), omi=c(0, 1, 0.3, 0));
+for (j in 1:6) {
+  m14<-c14[[j]]; 
+  for (i in 1:12) {
+    mn<-min(sapply(c14, function(x) min(x[, i])));
+    mx<-max(sapply(c14, function(x) max(x[, i])));
+    plot(seq(-2500, 2500, 50), m14[, i], type='n', ylab='', xlab='', yaxs='i', xaxs='i', ylim=c(mn-0.05, mx+0.05), main='', axes=FALSE);
+    polygon(c(-2500, seq(-2500, 2500, 50), 2500), c(0, m14[, i], 0), border=NA, col='lightgrey');
+    abline(v=c(-500, 0, 700), lty=2, col='grey');
+    if (i==1) mtext(paste('H3K4me3', names(c14)[j], sep='\n'), 3, outer=TRUE, at=(j-0.5)/6, col=4, cex=0.75);
+    box(lwd=0.5);
+  }
+}
+for (i in 1:12) mtext(names(cov14)[i], 2, outer=TRUE, las=2, at=(12-i+0.5)/12, col=4);
+dev.off();
+fn.cd14<-pdf2png(fn, rerun.all);
+```
+![](`r fn.cd14`)
+
+**Figure `r fig.count`.** Patterns of CTCF and eleven histone marks in ENCODE CD14+ monocyte. `r length(tss)` TSSs were grouped based on their H3K4me3 patterns obtained above. Sequencing depth of each mark was normalized the same way as this study. All plots in the same row have the same y-axis scale.
+
+```{r downstream_k4me1_k36me3, include=FALSE}
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'downstream_k4_k36.pdf', sep='/');
+pdf(fn, w=6, h=7.2);
+par(mar=c(2, 2, 2, 2), omi=c(1, 1, 0, 0), mfrow=c(3,1));
+s<-sets0[[2]]$Downstream;
+c<-colMeans(cov0[s, ]);
+cv14<-sapply(cov14[c('H3k4me2', 'H3k4me1', 'H3k36me3')], function(c) colMeans(c[s, ]));
+cv14<-apply(cv14, 2, function(x) x/(max(x)/max(c)));
+colnames(cv14)<-c('H3K4me2', 'H3K4me1', 'H3K36me3');
+for (i in 1:3) {
+  plot(seq(-2500, 2500, 50), c[51:151], type='n', ylab='', xlab='', yaxs='i', xaxs='i', 
+       ylim=c(min(min(cv14[, i]), 0)-0.1, max(c)+0.1), main=paste("H3K4me3 vs.", colnames(cv14)[i]), cex.main=1.5);
+  polygon(c(-2500, seq(-2500, 2500, 50), 2500), c(0, c[51:151], 0), border=NA, col='lightgrey');
+  lines(seq(-2500, 2500, 50), c[51:151], lwd=2, col='darkgrey');
+  lines(seq(-2500, 2500, 50), cv14[51:151, i], lwd=2, col='darkblue');
+  legend(-2500, max(c), bty='n', lty=1, lwd=2, col=c('darkgrey', 'darkblue'), legend = c('H3K4me3', colnames(cv14)[i]));
+  abline(v=c(-500, 0, 700), lty=2, col='grey');
+}
+title(xlab='Distance to TSS (bp)', ylab='Adjusted average sequencing depth', cex.lab=2, outer = TRUE);
+dev.off();
+fn.k36<-pdf2png(fn, rerun.all);
+```
+![](`r fn.k36`)
+
+**Figure `r fig.count`.** Comparisone of the Downstream Extended H3K4me3 pattern with three other histone marks shows concordant patterns of histone modifications.
+
+```{r gene.set.enrichment, include=FALSE}
+cll<-readRDS(paste(Sys.getenv('RCHIVE_HOME'), 'data/gene.set/r/default_set_human_5-1000.rds', sep='/'));
+u<-unlist(gn.id[[1]][1:5], use.names=FALSE); # All genes with H3K4me3 at TSS
+gse<-lapply(gn.id[[1]][1:4], function(gs) awsomics::TestGSE(gs, u, cll[[2]]));
+stat.gse<-lapply(gse, function(gse) cbind(cll[[1]][rownames(gse[[1]]), ], gse[[1]]));
+
+# write results
+path.gse<-paste(path.result, 'gene_set_enrichment', sep='/');
+if (!file.exists(path.gse)) dir.create(path.gse);
+fn.gse<-lapply(names(stat.gse[1:4]), function(nm) {
+  s<-stat.gse[[nm]];
+  write.csv(s[s$P_HyperGeo<=0.05, -4], paste(path.gse, '/', nm, '.csv', sep=''));
+  s$Name<-awsomics::AddHref(s$Name, s$URL);
+  pg<-DT::datatable(s[s$P_HyperGeo<=0.05, -(4:5)], options=list("pageLength"=50, 'server'=TRUE), rownames=FALSE, filter='top', escape=FALSE, caption=nm);
+  fn<-paste(path.gse, '/', nm, '.html', sep='');
+  htmlwidgets::saveWidget(pg, fn, selfcontained=FALSE);
+  fn
+});
+names(fn.gse)<-names(stat.gse[1:4]);
+```
+
+#### Results of gene set over-representation analysis:
+- [`r names(fn.gse)[1]` H3K4me3](`r fn.gse[1]`);
+- [`r names(fn.gse)[2]` H3K4me3](`r fn.gse[2]`);
+- [`r names(fn.gse)[3]` H3K4me3](`r fn.gse[3]`);
+- [`r names(fn.gse)[4]` H3K4me3](`r fn.gse[4]`);
+
+#### Counts
+**Table `r tbl.count`. Number of unique TSSs classified into each H3K4me3 pattern.**
+```{r table_tss_count}
+tbl<-sapply(sets, function(x) sapply(x, length));
+knitr::kable(tbl);
+tbl.count<-tbl.count+1;
+```
+
+**Table `r tbl.count`. Number of genes whose TSS(s) were unambiguously classified into each H3K4me3 pattern.**
+```{r table_gene_count}
+tbl<-sapply(gn.nm, function(x) sapply(x, length));
+knitr::kable(tbl);
+tbl.count<-tbl.count+1;
+```
+
+**Table `r tbl.count`. Control vs. SLE, H3K4me3 classification.**
+```{r tçable_classify_agree_sle}
+t<-as.matrix(xtabs(~cl[, 1]+cl[, 2]))[names(sets[[1]]), names(sets[[1]])];
+names(dimnames(t))<-c('', '');
+rownames(t)<-paste('Control', rownames(t), sep='_');
+colnames(t)<-paste('SLE', colnames(t), sep='_');
+knitr::kable(t);
+tbl.count<-tbl.count+1;
+```
+
+**Table `r tbl.count`. Control samples vs. ENCODE CD14+ monocyte, H3K4me3 classification.**
+```{r table_classify_agree_cd14}
+t<-as.matrix(xtabs(~cl[, 1]+cl[, 3]))[names(sets[[1]]), names(sets[[1]])];
+names(dimnames(t))<-c('', '');
+rownames(t)<-paste('Control', rownames(t), sep='_');
+colnames(t)<-paste('CD14', colnames(t), sep='_');knitr::kable(t);
+tbl.count<-tbl.count+1;
+```
+
+```{r control_vs_cd14, include=FALSE}
+fig.count<-fig.count+1;
+# Location-specific correlation between control samples and ENCODE CD14+ monoctye
+cnm<-names(indexes)[c(2, 1, 3)]
+m0<-sapply(cnm, function(cnm) rowMeans(cov0[, indexes[[cnm]]]));
+m1<-sapply(cnm, function(cnm) rowMeans(cov1[, indexes[[cnm]]]));
+m14<-sapply(cnm, function(cnm) rowMeans(cov.cd14[, indexes[[cnm]]]));
+r14<-round(sapply(cnm, function(cnm) cor(m0[, cnm], m14[, cnm])), 3);
+fn<-paste(path.figure, 'primary_vs_cd14.pdf', sep='/');
+pdf(fn, w=12, h=4);
+par(mfrow=c(1, 3), mar=c(5, 5, 2, 2));
+for (i in 1:3) plot(m0[, cnm[i]], m14[, cnm[i]], pch=19, col='#88888888', xlab='Primary monocyte, control samples', ylab='ENCODE CD14+ monocyte', 
+                    cex.lab=2, main=paste(cnm[i], ', Corr = ', r14[i], sep=''), cex.main=1.5);
+dev.off();
+fn.cd14<-pdf2png(fn, rerun.all);
+```
+![](`r fn.cd14`) 
+
+**Figure `r fig.count`. Agreement of H3K4me3 between samples of this study and ENCODE CD14+ monocyte at different regions around TSS.** The correlation between samples from two independent studies is similarly strong at three different regions around TSS.  
+
+```{r expr_tss_pattern, include=FALSE}
+fig.count<-fig.count+1;
+# Plot association between H3K4me3 patterns and gene expression data
+nm<-names(gn.nm)[1];
+gn<-gn.nm[[nm]];
+ex<-e[[nm]];
+ex<-ex[rowMeans(ex)>0, ];
+gn<-lapply(gn, function(gn) intersect(gn, rownames(ex)))[1:5];
+m<-rowMeans(ex);
+ms<-sapply(gn, function(gn) mean(m[gn]));
+se<-sapply(gn, function(gn) sd(m[gn])/sqrt(length(gn)));
+
+# SD before adjustment
+sd<-apply(ex, 1, sd);
+msd<-sapply(gn, function(gn) mean(sd[gn]));
+sse<-sapply(gn, function(gn) sd(sd[gn])/sqrt(length(gn)));
+
+# SD adjusted by expression level
+sd.adj<-sd-as.vector(predict(loess(sd~m), data.frame(m)))+mean(sd); # adjust by fitting a linear model
+names(sd.adj)<-names(sd);
+msd.adj<-sapply(gn, function(gn) mean(sd.adj[gn]));
+sse.adj<-sapply(gn, function(gn) sd(sd.adj[gn])/sqrt(length(gn)));
+
+p.mn<-sapply(gn[1:4], function(g) wilcox.test(m[g], m[gn[[5]]])$p.value);
+p.sd<-sapply(gn[1:4], function(g) wilcox.test(sd.adj[g], sd.adj[gn[[5]]])$p.value);
+
+fn<-paste(path.figure, 'Barplot_expr_means.pdf', sep='/');
+pdf(fn, w=8, h=12);
+par(mfrow=c(2, 1), mar=c(12,5,3,2));
+barplot2(exp(ms*log(2)), plot.ci=TRUE, ci.u=exp((ms+se)*log(2)), ci.l=exp((ms-se)*log(2)), names=sub(' ', '\n', title[1:5]), ylab='Average FPKM', las=3, cex.lab=2, cex.names=1.8, yaxs='i', ylim=c(0, 1.05*max(exp((ms+se)*log(2)))), space=0.5, main="Expression level", cex.main=2);
+text(seq(1, 6, 1.5), 0, paste('p =\n', sapply(p.mn, function(p) format(p, scientific = TRUE, digits=2))), pos=3, col='darkblue', cex=1.2); 
+barplot2(msd.adj, plot.ci=TRUE, ci.u=msd.adj+sse.adj, ci.l=msd.adj-sse.adj, ylab='Average standard deviation', las=3, names=sub(' ', '\n', title[1:5]), cex.lab=1.5, cex.names=1.8, yaxs='i', ylim=c(0, 1.05*max(msd+sse)), space=0.5,main="Between-sample variation", cex.main=2);
+text(seq(1, 6, 1.5), 0, paste('p =\n', sapply(p.sd, function(p) format(p, scientific = TRUE, digits=2))), pos=3, col='darkblue', cex=1.2); 
+dev.off();
+
+fn.expr.mean<-pdf2png(fn, rerun.all);
+```
+![](`r fn.expr.mean`) 
+
+**Figure `r fig.count`. The association between TSS H3K4me3 patterns and transcription of downstream genes.** A). Genes with extended H3K4me3 at downstream of their TSSs had generally higher expression level. B). The same type of genes also had higher between sample variance. To make this plot, the dependence of between-sample variance on gene expression level was removed using the Loess local fitting method. 
+
+```{r overlap_pattern_deg, include=FALSE}
+fig.count<-fig.count+1;
+fsh<-lapply(names(deg.tss), function(nm1) lapply(names(sets), function(nm2) lapply(names(sets[[nm2]]), function(nm3) {
+  fn.pdf<-paste('Venn_', paste(nm2, nm3, sep='_'), '-vs-', nm1, '.pdf', sep='');
+  fn.pdf<-paste(path.figure, fn.pdf, sep='/');
+  pdf(fn.pdf, w=8, h=6);
+  fsh<-awsomics::PlotVenn(sets[[nm2]][[nm3]], deg.tss[[nm1]], c(paste(nm2, nm3, sep='_'), nm1), unlist(sets[[nm2]]));
+  dev.off()
+  fsh;
+})));
+names(fsh)<-names(deg.tss);
+or<-lapply(fsh, function(fsh) lapply(fsh, function(fsh) sapply(fsh, function(fsh) c(fsh[[2]][[3]], fsh[[2]][[2]]))));
+ct<-lapply(fsh, function(fsh) lapply(fsh, function(fsh) sapply(fsh, function(fsh) fsh[[1]][4])));
+pv<-lapply(fsh, function(fsh) lapply(fsh, function(fsh) sapply(fsh, function(fsh) format(fsh[[2]][1], digits=1))));
+or<-list(
+  'Control' = lapply(1:3, function(i) sapply(1:2, function(j) or[[j]][[1]][i, ])),
+  'SLE' = lapply(1:3, function(i) sapply(1:2, function(j) or[[j]][[2]][i, ])),
+  'CD14' = lapply(1:3, function(i) sapply(1:2, function(j) or[[j]][[3]][i, ]))
+);
+ct<-lapply(1:3, function(i) do.call('cbind', lapply(ct, function(ct) ct[[i]])));
+pv<-lapply(1:3, function(i) do.call('cbind', lapply(pv, function(pv) pv[[i]])));
+names(ct)<-names(pv)<-names(or);
+fn.pattern.deg<-lapply(names(or), function(nm) {
+  fn.pdf<-paste('d_Expr-Breadth_', nm, '.pdf', sep='');
+  fn.pdf<-paste(path.figure, fn.pdf, sep='/');
+  o<-t(or[[nm]][[1]]);
+  lo<-t(or[[nm]][[2]]);
+  hi<-t(or[[nm]][[3]]);  
+  pdf(fn.pdf, w=8, h=6);
+  par(mar=c(5, 5, 3, 2));
+  barplot2(o[, 1:5], be=TRUE, plot.ci=TRUE, ci.u=hi[, 1:5], ci.l=lo[, 1:5], ylim=c(0, 1.05*max(hi[, 1:5])), yaxs='i', ylab='Odds ratio', las=1, names.arg=rep('', 5), cex.lab=2,
+           main='Differential expression vs. H3K4me3 patterns', cex.main=2,
+           legend=c('Expression up in SLE', 'Expression down in SLE'));
+  text(0.5+seq(1, 15, 3), -1*0.01*max(hi[, 1:5]), label=ct[[nm]][1:5, 1], xpd=TRUE, pos=1, col='blue');
+  text(0.5+seq(2, 15, 3), -1*0.01*max(hi[, 1:5]), label=ct[[nm]][1:5, 2], xpd=TRUE, pos=1, col='blue');
+  text(0.5+seq(1, 15, 3), -1*0.05*max(hi[, 1:5]), label=pv[[nm]][1:5, 1], xpd=TRUE, pos=1, col='blue', cex=0.8);
+  text(0.5+seq(2, 15, 3), -1*0.05*max(hi[, 1:5]), label=pv[[nm]][1:5, 2], xpd=TRUE, pos=1, col='blue', cex=0.8);
+  text(0, -1*max(hi[, 1:5])*c(0.01, 0.05), label=c('# genes =', 'p value ='), xpd=TRUE, pos=1, col='blue', cex=c(1, 0.8));
+  text(1+seq(1, 15, 3), -1*0.12*max(hi[, 1:5]), label=sub(' ', '\n', title[1:5]), xpd=TRUE, pos=1, col='black', cex=1.2);
+  abline(h=1, lty=2, col=8);
+  box();
+  dev.off();
+  pdf2png(fn.pdf, rerun.all);
+})
+```
+![](`r fn.pattern.deg[[1]][1]`) 
+
+**Figure `r fig.count`. The association between differential gene expression in SLE and H3K4me3 patterns.**  The odd ratios represent the likelihood of genes having differential expression in SLE. 
+
+```{r delta_delta, include=FALSE}
+fig.count<-fig.count+1;
+# Mapping TSS and genes
+l2r<-stat[, 6];
+dff<-cov1-cov0;
+dff<-dff[unlist(sets[[1]][1:5]), ];
+dff<-dff[as.vector(tss[rownames(dff)]$Gene) %in% names(l2r), ];
+mean.regions<-sapply(indexes, function(i) rowMeans(dff[, i])); # change at all 3 regions
+l2r<-l2r[as.vector(tss[rownames(dff)]$Gene)];
+
+# Split genes by H3K4me3 changes
+x<-100*(exp(mean.regions*log(2))-1);
+l2r0.up<-apply(x, 2, function(x) lapply(0:20, function(i) l2r[x>=i]));
+l2r0.dn<-apply(x, 2, function(x) lapply(0:-20, function(i) l2r[x<=i]));
+
+global.mean<-mean(stat[unique(names(l2r)), 6]);
+
+# adjust by removing dependence on each other
+mean.adj<-sapply(1:3, function(i) {
+  y<-mean.regions[, i];
+  x<-mean.regions[, -i];
+  x1<-x[,1]; 
+  x2<-x[,2];
+  residuals(lm(y~x1*x2));
+})
+# Split genes by H3K4me3 changes
+x<-100*(exp(mean.adj*log(2))-1);
+l2r1.up<-apply(x, 2, function(x) lapply(0:20, function(i) l2r[x>=i]));
+l2r1.dn<-apply(x, 2, function(x) lapply(0:-20, function(i) l2r[x<=i]));
+
+# Plotting
+fn<-paste(path.figure, 'H3K4me3-transcription.pdf', sep='/');
+pdf(fn, w=12, h=9);
+par(mfrow=c(2, 2), omi=c(1, 1, 0, 0));
+# Making plots
+plotDeltaDelta(l2r0.up, global.mean, 0:20, fn='', xlab='', ylab='', main='H3K4me3 up, Before adjustment', legend=TRUE);
+plotDeltaDelta(l2r1.up, global.mean, 0:20, fn='', xlab='', ylab='', main='H3K4me3 up, After adjustment');
+plotDeltaDelta(l2r0.dn, global.mean, 0:-20, fn='', xlab='', ylab='', main='H3K4me3 down, Before adjustment');
+plotDeltaDelta(l2r1.dn, global.mean, 0:-20, fn='', xlab='', ylab='', main='H3K4me3 down, After adjustment');
+title(xlab='Minimal H3K4me3 change in SLE (%)', ylab='Average transcription change (%)', outer=TRUE, cex.lab=2.5, line=3);
+dev.off();
+
+fn.delta.delta<-pdf2png(fn, rerun.all);
+```
+![](`r fn.delta.delta`)
+
+**Figure `r fig.count`. The effect of H3K4me3 change around TSS on differential gene expression in SLE.** Each plot shows the average change of gene expression in SLE in response to one percent of H3K4me3 change at three different regions. Such association was re-evaluated after removing the dependence of H3K4me3 at these three neighboring regions on each other.
+
+```{r expr_up, include=FALSE}
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'H3K4me3_of_Upregulated_Genes_After_Adjustment.pdf', sep='/')
+pdf(fn, h=12, w=6);
+mean.up<-mean.adj[names(l2r) %in% deg[[1]], ];
+mean.up<-mean.up[, c(2, 1, 3)];
+colnames(mean.up)<-c('Upstream', 'TSS', 'Downstream');
+par(mfrow=c(3, 1), mar=c(2, 5, 3, 2), omi=c(1, 0, 0, 0));
+for (i in 1:3) {
+  hist(100*(exp(mean.up[,i]*log(2))-1), main=colnames(mean.up)[i], cex.main=2, cex.lab=2, xlab='', xlim=c(-20, 40), br=seq(-100, 100, 2), col='#66666666');
+  abline(v=0, lwd=2, col=4);
+  box();
+}
+title(xlab='H3K4me3 change in SLE (%)', outer=TRUE, cex.lab=2);
+dev.off();
+fn.expr.up<-pdf2png(fn, rerun.all);
+```
+![](`r fn.expr.up`)
+
+**Figure `r fig.count`. H3K4me3 changes of genes with significant increase of expression in SLE.** The distribution of H3K4me3 changes at three different regions, of genes with increased expression in SLE.
+
+```{r expr_up_region, include=FALSE}
+fig.count<-fig.count+1;
+# SLE-control difference around TSS of up-regulated genes
+fn<-paste(path.figure, 'H3K4me3_of_Upregulated_Genes_Around_TSS.pdf', sep='/');
+pdf(fn, h=6, w=8);
+par(mar=c(5,5,2,2));
+chg<-colMeans(cov1[rownames(mean.up), ])-colMeans(cov0[rownames(mean.up), ]);
+chg<-100*(exp(chg*log(2))-1);
+plot(seq(-5000, 5000, 50), smooth(chg), yaxs='i', ylim=c(0, 1.1*max(chg)), type='l', col='white', xlab='Distance to TSS (bp)', ylab='Average H3K4me3 change (%)', cex.lab=2);
+abline(v=c(0, 700), col='black', lty=2, lwd=2);
+polygon(c(-5000, seq(-5000, 5000, 50), 5000), c(0, smooth(chg), 0), border='gold', lwd=2, col='#88888888');
+dev.off();
+fn.expr.up.region<-pdf2png(fn, rerun.all);
+```
+![](`r fn.expr.up.region`)
+
+**Figure `r fig.count`. Region-specific H3K4me3 change of genes with increased expression in SLE.** This plot shows the average H3K4me3 change around 278 TSSs whose downstream genes were significantly increased in SLE.
+
+```{r tfbs, include=FALSE}
+if (rerun.all) {
+  # Previously processed data of potential TFBS
+  tfbs<-readRDS(paste(path.data, 'tfbs_summary_simplified.rds', sep='/'));
+  inds<-lapply(sets[[1]], function(s) which(tss.id %in% s));
+  tfbs.sum<-lapply(inds, function(ind) sapply(tfbs, function(x) colSums(x[ind, ])));
+  tfbs.sum<-lapply(tfbs.sum, t);
+  tfbs.n<-sapply(tfbs, sum);
+  tfbs.sm<-sapply(tfbs.sum, rowSums);
+  tfbs.sm0<-rowSums(tfbs.sm[, -6]);
+  tfbs.sm1<-tfbs.sm[, 6];
+  n<-sapply(inds, length);
+  tfbs.rt<-(tfbs.sm0/sum(n[-6]))/(tfbs.sm1/n[6]);
+  tfbs.id<-names(tfbs)[tfbs.n>=1000&tfbs.n<=100000&tfbs.rt>=1.2];
+}
+tfbs.mean<-sapply(tfbs.sum, function(x) colSums(x[tfbs.id, ]));
+tfbs.mean<-t(t(tfbs.mean)/n);
+tfbs.en<-apply(tfbs.mean, 2, function(x) x/tfbs.mean[, 6]);
+
+col4<-c('gold', 'red', 'blue', 'purple');
+
+fig.count<-fig.count+1;
+fn<-paste(path.figure, 'tfbs_enrich_avg.pdf', sep='/');
+pdf(fn, w=8, h=6);
+par(mar=c(5,5,2,2));
+plot(0, type='n', xlim=c(-1000, 1000), yaxs='i', xaxs='i', ylim=c(0, 1.05*max(tfbs.en)), xlab='Distance to TSS', ylab='Enrichment of TFBS', cex.lab=2);
+abline(h=1, lty=2, col='lightgrey');
+#for (i in 1:4) lines(smooth.spline(seq(-1000, 1000, 50), tfbs.en[, i], spar=0.35), col=col4[i], lwd=2);
+for (i in 1:4) lines(seq(-1000, 1000, 50), tfbs.en[, i], col=col4[i], lwd=2);
+legend(-1000, max(tfbs.en), legend=title[1:4], bty='n', cex=1.25, col=col4, lty=1, lwd=2);
+dev.off();
+fn.tfbs.enrich<-pdf2png(fn, rerun.all);
+```
+![](`r fn.tfbs.enrich`)
+
+**Figure `r fig.count`. Enrichment of TFBSs around TSS corresponding to H3K4me3 patterns.** Matches to 2414 known protein-binding motifs were searched around TSSs, which found that 340 motifs were enriched around TSS with H3K4me3 (at least 20% more). The average enrichment of these motifs were plotted separately for each H3K4me3 pattern. The enrichment was spread across a broader region around TSSs with broad H3K4me3 peaks, suggesting that TF binding plays a role in maintaining H3K4me3 broadth. 
+
+```{r fn.tfbs.eg, include=FALSE}
+anno.pwm<-eval(parse(text=load(paste(path.data, 'pwm_anno.rdata', sep='/'))));
+# Manually picked examples of motifs enriched in one type of peaks
+ex.narrow<-'UP00408';
+ex.broad<-'M01520';
+
+mtf1<-sapply(sets[[1]], function(s) colMeans(tfbs[[ex.narrow]][tss.id %in% s, ]));
+mtf1<-apply(mtf1, 2, function(x) x/mtf1[, 6]);
+
+mtf2<-sapply(sets[[1]], function(s) colMeans(tfbs[[ex.broad]][tss.id %in% s, ]));
+mtf2<-apply(mtf2, 2, function(x) x/mtf2[, 6]);
+
+fn<-paste(path.figure, 'tfbs_enrich_examples.pdf', sep='/');
+pdf(fn, w=8, h=12);
+par(mfrow=c(2, 1), mar=c(5,5,3,2));
+plot.eg<-function(tfbs.en, ttl='', lgd=FALSE) {
+  plot(0, type='n', xlim=c(-1000, 1000), main=ttl, cex.main=1.5, yaxs='i', xaxs='i', ylim=c(0, 1.05*max(tfbs.en)), xlab='Distance to TSS', ylab='Enrichment of TFBS', cex.lab=2);
+  abline(h=1, lty=2, col='lightgrey');
+  for (i in 1:4) lines(seq(-1000, 1000, 50), tfbs.en[, i], col=col4[i], lwd=2)
+  if (lgd) legend(-1000, max(tfbs.en), title[1:4], bty='n', cex=1.25, col=col4, lty=1, lwd=2);
+}
+plot.eg(mtf1, ttl=paste(ex.narrow, "/", toupper(anno.pwm[ex.narrow, 1]), ": ", anno.pwm[ex.narrow, 4], sep=''), lgd=TRUE);
+plot.eg(mtf2, ttl=paste(ex.broad, "/", toupper(anno.pwm[ex.broad, 1]), ": ", anno.pwm[ex.broad, 4], sep=''), lgd=FALSE);
+dev.off();
+fn.tfbs.enrich<-pdf2png(fn, rerun.all);
+```
+![](`r fn.tfbs.enrich`)
+
+**Figure `r fig.count`. Examples of TFBS enrichment at TSS.** Matches to 2414 known protein-binding motifs were searched around TSSs, which found that 340 motifs were enriched around TSS with H3K4me3 (at least 20% more). The average enrichment of these motifs were plotted separately for each H3K4me3 pattern. The enrichment was spread across a broader region around TSSs with broad H3K4me3 peaks, suggesting that TF binding plays a role in maintaining H3K4me3 broadth. 
+
+```{r zip_figures, include=FALSE}
+fn.fig<-paste(path.result, 'figures', sep='/')
+#if (rerun.all) zip(fn.fig, path.figure);
+```
+
+[**Download all figures as zip file**](`r fn.fig`)
+
+---
+_END OF DOCUMENT_
