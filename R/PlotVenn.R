@@ -14,13 +14,13 @@ cat('Both sets are empty.\n');
 NA;
 } else {
 out<-list();
-par(mar=rep(0, 4), omi=rep(0, 4)); # no margins
+par(mar=rep(0, 4)); # no margins
 plot(0, type='n', xlim=c(0, 8), ylim=c(0, 6), axes=F, bty='n', xaxs='i', yaxs='i', xlab='', ylab=''); # plot an empty space
 bg<-'yellow1';
 fg<-'lightblue';
-symbols(3, 3, circles=2, bg=bg, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
-symbols(5, 3, circles=2, bg=bg, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
-symbols(3, 3, circles=2, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
+symbols(3, 3, circles=1.8, bg=bg, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
+symbols(5, 3, circles=1.8, bg=bg, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
+symbols(3, 3, circles=1.8, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
 
 rect(0, 0, 8, 6, lwd=lwd, border='black');
 
