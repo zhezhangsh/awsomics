@@ -36,8 +36,8 @@ text(2, 3, labels=l1, col=col, cex=cex);
 text(6, 3, labels=l2, col=col, cex=cex);
 text(4, 3, labels=l0, col=col, cex=cex);
 
-text(0.5, 3, labels=names[1], cex=cex-1, col='darkblue', srt=90);
-text(7.5, 3, labels=names[2], cex=cex-1, col='darkblue', srt=270);
+text(0.5, 3, labels=names[1], cex=cex, col='darkblue', srt=90);
+text(7.5, 3, labels=names[2], cex=cex, col='darkblue', srt=270);
 
 if (length(universe)>=2) {
 text(4, 0, labels=l, pos=3, cex=cex, col=col);
