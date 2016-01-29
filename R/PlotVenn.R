@@ -52,7 +52,7 @@ line<-paste(
 paste('Odds ratio=', round(or, 2), sep=''), '; ',
 paste('95% C.I.=(', round(ci[1], 2), ', ', round(ci[2], 2), ')', sep=''), '; ',
 paste('p=', p), sep='');
-text(4, 5.5, labels=line, cex=1.25*cex);
+text(4, 6, labels=line, cex=cex, pos=1);
 
 } # end of fisher test
 }
