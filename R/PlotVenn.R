@@ -1,5 +1,5 @@
 # Draw a 2-set Venn diagram
-PlotVenn<-function(s1, s2, names=c('Set1', 'Set2'),  universe=c(), fisher=TRUE, pdf=FALSE, plot.new=FALSE, lwd=4, cex=1) {
+PlotVenn<-function(s1, s2, names=c('Set1', 'Set2'),  universe=c(), fisher=TRUE, pdf=FALSE, plot.new=FALSE, lwd=4, cex=1, title='') {
 
 if (length(universe)>=2) {
 s1<-intersect(s1, universe);
@@ -14,7 +14,7 @@ cat('Both sets are empty.\n');
 NA;
 } else {
 out<-list();
-par(mar=rep(0, 4)); # no margins
+if (title[1]=='') par(mar=rep(2, 4)) else par(mar=c(2, 2, 4, 2));
 plot(0, type='n', xlim=c(0, 8), ylim=c(0, 6), axes=F, bty='n', xaxs='i', yaxs='i', xlab='', ylab=''); # plot an empty space
 bg<-'yellow1';
 fg<-'lightblue';
@@ -23,6 +23,7 @@ symbols(5, 3, circles=1.8, bg=bg, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
 symbols(3, 3, circles=1.8, fg=fg, lwd=lwd, add=TRUE, inches=FALSE);
 
 rect(0, 0, 8, 6, lwd=lwd, border='black');
+title(main=title, cex.main=2); 
 
 s0<-intersect(s1, s2);
 l0<-length(s0);
