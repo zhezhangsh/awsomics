@@ -1,5 +1,5 @@
 # Draw a 2-set Venn diagram
-PlotVenn<-function(s1, s2, names=c('Set1', 'Set2'),  universe=c(), fisher=TRUE, pdf=FALSE, plot.new=FALSE, lwd=4) {
+PlotVenn<-function(s1, s2, names=c('Set1', 'Set2'),  universe=c(), fisher=TRUE, pdf=FALSE, plot.new=FALSE, lwd=4, cex=1) {
 
 if (length(universe)>=2) {
 s1<-intersect(s1, universe);
@@ -30,7 +30,6 @@ l1<-length(s1)-l0;
 l2<-length(s2)-l0;
 l<-length(universe)-l0-l1-l2;
 out$counts<-c(l, l1, l2, l0);
-cex=3;
 col='maroon';
 text(2, 3, labels=l1, col=col, cex=cex);
 text(6, 3, labels=l2, col=col, cex=cex);
