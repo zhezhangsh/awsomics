@@ -39,7 +39,7 @@ text(0.5, 3, labels=names[1], cex=cex-1, col='darkblue', srt=90);
 text(7.5, 3, labels=names[2], cex=cex-1, col='darkblue', srt=270);
 
 if (length(universe)>=2) {
-text(4, .5, labels=l, cex=cex, col=col);
+text(4, 0, labels=l, pos=3, cex=cex, col=col);
 if (fisher) {
 out$fisher<-fisher.test(matrix(out$counts, nr=2));
 p<-out$fisher[[1]];
@@ -52,7 +52,7 @@ line<-paste(
 paste('Odds ratio=', round(or, 2), sep=''), '; ',
 paste('95% C.I.=(', round(ci[1], 2), ', ', round(ci[2], 2), ')', sep=''), '; ',
 paste('p=', p), sep='');
-text(4, 5.5, labels=line, cex=1.75);
+text(4, 5.5, labels=line, cex=1.25*cex);
 
 } # end of fisher test
 }
