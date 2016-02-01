@@ -1,5 +1,11 @@
 # Call the gplots::heatmap.2 function in a 'simple' way
 
+# blue-pinkogram colors. 
+GetBluePickogramColors<-function() {
+  c("#0000FF", "#0707FF", "#0E0EFF", "#1515FF", "#1C1CFF", "#2424FF", "#2B2BFF", "#3232FF", "#3939FF", "#4040FF", "#4848FF", "#5050FF", "#5858FF", "#6060FF", "#6868FF", "#7070FF", "#7878FF", "#8080FF", "#8888FF", "#9191FF", "#9999FF", "#A2A2FF", "#AAAAFF", "#B3B3FF", "#BBBBFF", "#C4C4FF", "#CCCCFF", "#D5D5FF", "#DAD0FB", "#DECBF7", "#E3C7F3", "#E8C2EF", "#ECBDEA", "#F1B8E6", "#F6B4E2", "#FAAFDE", "#FFAADA", "#FFA4D0", "#FF9DC6", "#FF97BC", "#FF90B2", "#FF8AA8", "#FF839E", "#FF7D94", "#FF768A", "#FF7080", "#FF6B79", "#FF6572", "#FF606B", "#FF5B64", "#FF555C", "#FF5055", "#FF4B4E", "#FF4547", "#FF4040", "#FF3939", "#FF3232", "#FF2B2B", "#FF2424", "#FF1C1C", "#FF1515", "#FF0E0E", "#FF0707", "#FF0000");
+}
+
+
 PlotHeatmap.2<-function(d, col='default', key=FALSE, trace='none', sepwidth=c(0,0), ...) {
   
   if (identical(col, 'default')) {
