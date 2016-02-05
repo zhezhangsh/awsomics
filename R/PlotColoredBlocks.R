@@ -146,7 +146,7 @@ CalculateColoredBlockSize<-function(d, ratio=1, max.size=12) {
   block.h<-ratio*sz*nr;
   
   full.w<-block.w + ratio*0.12*max(nchar(rownames(d))) + 0.4; 
-  full.h<-block.h + 0.12*max(nchar(colnames(d))) + 0.4; 
+  full.h<-block.h + 0.1*max(nchar(colnames(d))) + 0.4; 
   
   c(full.w, full.h)/max(1, max(c(full.w, full.h))/max.size); 
 }
