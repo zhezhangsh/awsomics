@@ -1,6 +1,6 @@
 
 # Default method to plot customized heatmap-like blue-red colored grid, with column and row name labels
-PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='') {
+PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c()) {
   # d             Data matrix to plot; column and row names will be plotted
   # num.breaks    Number of color breakpoints
   # min, max      Minimal and maximal values to plot; round values lower or higher than the values
@@ -61,6 +61,15 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='') {
   plot(0, type='n', xlim=c(0, limit.w), ylim=c(0, limit.h), xaxs='i', yaxs='i', axes=FALSE, xlab='', ylab='');
   image(0:nc, 0:nr, t(d[nr:1,]), col=col, breaks=breaks, add=TRUE);
   
+  # color label
+  if (length(groups) > 0) {
+    c0<-gplots::colorpanel(length(groups), "#CCCCCC", "#FFEE00");
+    col<-rep('#FFFFFF', ncol(d)); 
+    names(col)<-colnames(d); 
+    for (i in 1:length(groups)) col[names(col) %in% groups[[i]]]<-c0[i]; 
+    rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=col)
+  }
+  
   # plot row names
   space.w<-(1-nc/limit.w)*W;
   cex.w<-(space.w-0.2)/wid.r; 
@@ -72,7 +81,7 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='') {
   cex.h<-(space.h-0.2)/wid.c; 
   cex.h<-min(cex.h, 0.66*(W/limit.w)/str.h); 
   text((1:nc)-0.5, (nr+limit.h)/2, srt=90, label=cnm, cex=cex.h);
-  
+
   # Plot key
   if (!is.na(key) & key!='') {
     # key name
