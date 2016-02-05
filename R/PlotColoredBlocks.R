@@ -46,6 +46,8 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   str.r<-max(ratio[1]*block.w, min(ratio[2]*block.w, str.r)); 
   str.c<-max(ratio[1]*block.h, min(ratio[2]*block.h, str.c)); 
   
+  if (0.9*block.w/ncol(d) < str.h) str.c<-str.c*(0.9*block.w/ncol(d)/str.h);
+  
   # label + block size
   full.w<-block.w+str.r;
   full.h<-block.h+str.c;
@@ -146,7 +148,7 @@ CalculateColoredBlockSize<-function(d, ratio=1, max.size=12) {
   block.h<-ratio*sz*nr;
   
   full.w<-block.w + ratio*0.12*max(nchar(rownames(d))) + 0.4; 
-  full.h<-block.h + 0.1*max(nchar(colnames(d))) + 0.4; 
+  full.h<-block.h + 0.12*max(nchar(colnames(d))) + 0.4; 
   
   c(full.w, full.h)/max(1, max(c(full.w, full.h))/max.size); 
 }
