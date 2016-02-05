@@ -64,10 +64,10 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   # color label
   if (length(groups) > 0) {
     c0<-gplots::colorpanel(length(groups), "#CCCCCC", "#FFEE00");
-    col<-rep('#FFFFFF', ncol(d)); 
-    names(col)<-colnames(d); 
-    for (i in 1:length(groups)) col[names(col) %in% groups[[i]]]<-c0[i]; 
-    rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=col)
+    c1<-rep('#FFFFFF', ncol(d)); 
+    names(c1)<-colnames(d); 
+    for (i in 1:length(groups)) c1[names(c1) %in% groups[[i]]]<-c0[i]; 
+    rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1)
   }
   
   # plot row names
@@ -93,7 +93,7 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
     key.h<-limit.h-nr;
     
     key.x<-c(nc + 0.15*key.w, nc + 0.85*key.w); 
-    key.y<-c(nr + 0.4*key.h, nr + 0.4*key.h + min(nr/25, 0.4*key.h)); 
+    key.y<-c(nr + 0.4*key.h, nr + 0.4*key.h + min(nr/20, 0.4*key.h)); 
     image(seq(key.x[1], key.x[2], length.out=num.breaks+1), key.y, matrix(breaks, nc=1), col=col, breaks=breaks, add=TRUE);
     
     min<-round(min, ceiling(log10(abs(min)))); 
