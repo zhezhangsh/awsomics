@@ -1,5 +1,5 @@
 # Plot several data series as lines
-PlotSeries(d, se=NA, labs=c('', ''), title='', draw.legend=TRUE) {
+PlotSeries<-function(d, se=NA, labs=c('', ''), title='', draw.legend=TRUE) {
   par(mar=c(max(nchar(colnames(d))),5,2,2)); 
   col<-rainbow(nrow(d));
   if (identical(dim(d), dim(se))) {
