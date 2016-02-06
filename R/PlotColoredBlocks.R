@@ -73,9 +73,9 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   }
   
   # row background label
-  c2<-rep('#000000', nrow(d));
-  c2[seq(2, nrow(d), 2)]<-'#333333'; 
-  rect(ncol(d), 0:nrow(d), limit.w, 0:nrow(d), border=NA, col=c2); 
+  c2<-rep('#FFFFFF', nrow(d));
+  c2[seq(2, nrow(d), 2)]<-'#DDDDDD'; 
+  rect(ncol(d), 0:(nrow(d)-1), limit.w, 1:nrow(d), border=NA, col=c2); 
   
   # plot row names
   space.w<-(1-nc/limit.w)*W;
