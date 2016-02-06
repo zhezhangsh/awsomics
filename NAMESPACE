@@ -54,6 +54,7 @@ export("PlotPCA2Groups");
 export("PlotPCALegend");
 export("PlotQqFromP");
 export("PlotQqFromPhred");
+export("PlotSeries");
 export("PlotVenn");
 export("PlotVenn3Way");
 export("ReformatMotifHits");
