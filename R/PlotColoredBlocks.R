@@ -62,15 +62,20 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   limit.h<-ceiling(full.h/(block.h/nr)); 
   plot(0, type='n', xlim=c(0, limit.w), ylim=c(0, limit.h), xaxs='i', yaxs='i', axes=FALSE, xlab='', ylab='');
   image(0:nc, 0:nr, t(d[nr:1,]), col=col, breaks=breaks, add=TRUE);
+
+  # column background label
+  #   if (length(groups) > 0) {
+  #     c0<-gplots::colorpanel(length(groups), "#CCCCCC", "#FFEE00");
+  #     c1<-rep('#FFFFFF', ncol(d)); 
+  #     names(c1)<-colnames(d); 
+  #     for (i in 1:length(groups)) c1[names(c1) %in% groups[[i]]]<-c0[i]; 
+  #     rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1)
+  #   }
   
   # column background label
-  if (length(groups) > 0) {
-    c0<-gplots::colorpanel(length(groups), "#CCCCCC", "#FFEE00");
-    c1<-rep('#FFFFFF', ncol(d)); 
-    names(c1)<-colnames(d); 
-    for (i in 1:length(groups)) c1[names(c1) %in% groups[[i]]]<-c0[i]; 
-    rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1)
-  }
+  c1<-rep('#FFFFFF', ncol(d));
+  c1[seq(1, ncol(d), 2)]<-'#DDDDDD'; 
+  rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1);
   
   # row background label
   c2<-rep('#FFFFFF', nrow(d));
