@@ -126,7 +126,7 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   lwd.w<-W*block.w/full.w/0.1; 
   
   if (lwd.h<=100) abline(h=0:nr, lwd=0.5, col='#333333') else if (lwd.h<=250) abline(h=0:nr, lwd=0.25, col='#333333') else if (lwd.h<=500) abline(h=0:nr, lwd=0.1, col='#333333')
-  if (lwd.w<=100) abline(v=0:nc, lwd=0.5, col='#333333') else if (lwd.w<=250) abline(v=0:nc, lwd=0.25, col='#333333') else if if (lwd.w<=500) abline(v=0:nc, lwd=0.1, col='#333333')
+  if (lwd.w<=100) abline(v=0:nc, lwd=0.5, col='#333333') else if (lwd.w<=250) abline(v=0:nc, lwd=0.25, col='#333333') else if (lwd.w<=500) abline(v=0:nc, lwd=0.1, col='#333333')
   
   box();
 }
