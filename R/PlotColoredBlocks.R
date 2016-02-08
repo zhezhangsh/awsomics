@@ -122,7 +122,7 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   
 
   # Not plotting grid if too many rows or columns
-  if (nr<=100) abline(h=0:nr, lwd=0.5, col='#333333') else if (nr<=250) abline(h=0:nr, lwd=0.25, col='#333333') else if (nr=500) abline(h=0:nr, lwd=0.1, col='#333333')
+  if (nr<=100) abline(h=0:nr, lwd=0.5, col='#333333') else if (nr<=250) abline(h=0:nr, lwd=0.25, col='#333333') else if (nr<=500) abline(h=0:nr, lwd=0.1, col='#333333')
   if (nc<=100) abline(v=0:nc, lwd=0.5, col='#333333') else if (nc<=250) abline(v=0:nc, lwd=0.25, col='#333333') else if (nc<=500) abline(v=0:nc, lwd=0.1, col='#333333')
   
   box();
