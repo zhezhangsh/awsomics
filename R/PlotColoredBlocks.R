@@ -120,7 +120,14 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
     text(nc+0.85*key.w, nr + 0.4*key.h, pos=1, label=max, cex=0.8*cex.h); 
   }
   
-  abline(v=0:nc, h=0:nr, lwd=0.25, col='#333333');
+
+  # Not plotting grid if too many rows or columns
+  lwd.h<-H*block.h/full.h/0.1; 
+  lwd.w<-W*block.w/full.w/0.1; 
+  
+  if (lwd.h<=100) abline(h=0:nr, lwd=0.5, col='#333333') else if (lwd.h<=250) abline(h=0:nr, lwd=0.25, col='#333333') else if (lwd.h<=500) abline(h=0:nr, lwd=0.1, col='#333333')
+  if (lwd.w<=100) abline(v=0:nc, lwd=0.5, col='#333333') else if (lwd.w<=250) abline(v=0:nc, lwd=0.25, col='#333333') else if if (lwd.w<=500) abline(v=0:nc, lwd=0.1, col='#333333')
+  
   box();
 }
 
