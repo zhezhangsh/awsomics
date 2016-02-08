@@ -73,14 +73,19 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   #   }
   
   # column background label
-  c1<-rep('#FFFFFF', ncol(d));
-  c1[seq(1, ncol(d), 2)]<-'#DDDDDD'; 
-  rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1);
+  if (length(groups) > 0) {
+    c0<-rep('#FFFFFF', length(groups));
+    c0[seq(1, length(groups), 2)]<-"#DDDDDD"
+    c1<-rep(c0, sapply(groups, length));
+    names(c1)<-unlist(groups);
+    c1<-c1[colnames(d)]; 
+    rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1);
+  }
   
   # row background label
   c2<-rep('#FFFFFF', nrow(d));
   c2[seq(1, nrow(d), 2)]<-'#DDDDDD'; 
-  rect(ncol(d), 0:(nrow(d)-1), limit.w, 1:nrow(d), border=NA, col=c2); 
+  rect(ncol(d), 0:(nrow(d)-1), limit.w, 1:nrow(d), border=NA, col=rev(c2)); 
   
   # plot row names
   space.w<-(1-nc/limit.w)*W;
