@@ -110,7 +110,7 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
     key.h<-limit.h-nr;
     
     key.x<-c(nc + 0.15*key.w, nc + 0.85*key.w); 
-    key.y<-c(nr + 0.4*key.h, nr + 0.4*key.h + min(nr/20, 0.4*key.h)); 
+    key.y<-c(nr + 0.4*key.h, nr + 0.6*key.h); 
     image(seq(key.x[1], key.x[2], length.out=num.breaks+1), key.y, matrix(breaks, nc=1), col=col, breaks=breaks, add=TRUE);
     
     min<-round(min, ceiling(log10(abs(min)))); 
