@@ -113,7 +113,7 @@ WrapGSE<-function(stat, anno, split.collection=FALSE, output=getwd()) {
     names(fn)<-src;
   }
   
-  saveRDS(tbl0, file=paste(output, paste(prefix, '_All_Sig.rds', sep=''), sep='/'));
+  saveRDS(tbl0, file=paste(output, 'GSE_All_Sig.rds', sep='/'));
   
   list(all=tbl0, formatted=tbls, file=fn); 
 }
