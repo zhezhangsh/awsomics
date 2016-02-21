@@ -56,7 +56,7 @@ TestGSE<-function(gs, u, coll, size.min=10, size.max=500, p.cutoff=0.05) {
 
 
 # Summarize, format, and write out results of gene set enrichment analysis from the TestGSE function
-WrapGSE<-function(stat, anno, split.collection=FALSE, output=getwd()) {
+WrapGSE<-function(stat, anno, output=getwd(), split.collection=FALSE) {
   # stat              Statistic table, the first element of the TestGSE outputs
   # anno              Gene set annotation
   # output            Path to output files
