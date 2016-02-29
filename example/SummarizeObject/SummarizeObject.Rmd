@@ -1,0 +1,93 @@
+---
+title: "Summarize data objects"
+author: "Jim Zhang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_caption: yes
+    toc: yes
+---
+
+```{r, include=FALSE}
+library(knitr); 
+library(ascii);
+
+yml<-yaml::yaml.load_file("/home/zhangz/R/source/awsomics/example/SummarizeObject/SummarizeObject.yml");
+fn<-yml$file;
+nm<-sapply(strsplit(fn, '/'), function(x) rev(x)[1]); 
+nm<-substr(nm, 1, sapply(gregexpr('\\.', nm), function(x) x[length(x)])-1); 
+names(fn)<-nm; 
+```
+
+<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+
+This is an R Markdown document that summarizes a set of table-like R objects. It reports the types (_data.frame_, _matrix_, _GRanges_, etc.), field names, field classes, and summary of field values for each object. 
+
+```{r, summarize_object, include=FALSE}
+summaryObj<-function(fn) {
+  obj<-readRDS(fn); 
+  cll<-class(obj); 
+  if (cll=='GRanges') obj<-as.data.frame(elementMetadata(obj)); 
+  if (cll=='matrix' | cll=='data.frame') {
+    n1<-nrow(obj);
+    n2<-ncol(obj);
+    nm<-colnames(obj); 
+    fld<-lapply(1:ncol(obj), function(i) obj[, i]); 
+    cnt<-sapply(fld, function(x) length(x[!is.na(x) & x!=''])); 
+    fld<-lapply(fld, function(x) sort(unique(as.vector(x))));
+    fld<-lapply(fld, function(x) x[!is.na(x) & x!='']);
+    names(fld)<-nm; 
+    cls<-sapply(fld, class); 
+    val<-t(sapply(fld, function(x) x[c(1, ceiling(length(x)/2), length(x))])); 
+    colnames(val)<-c('First', 'Middle', 'Last'); 
+    tbl<-data.frame(Class=cls, Count=cnt, Level=sapply(fld, length),  val, stringsAsFactors = FALSE); 
+  } else {
+    n1<-0;
+    n2<-0;
+    fld<-list();
+    tbl<-data.frame();
+  }
+  
+  list(class=cll, num.entry=n1, num.field=n2, field=fld, table=tbl); 
+}
+
+smm<-lapply(fn, summaryObj); 
+names(smm)<-names(fn); 
+```
+
+<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+
+# All files
+
+Summary of all files in a single table (each row represents a file): 
+
+```{r, write_out_0, include=TRUE, echo=FALSE}
+tbl<-t(sapply(smm, function(x) x[1:3])); 
+dimnames(tbl)<-list(names(smm), c('Data_type', 'Num_Entry', 'Num_Field')); 
+info<-file.info(fn); 
+tbl<-data.frame(File_size=format(info[, 'size'], big.mark = ','), tbl, Modify_time=as.character(info[, 'mtime'])); 
+kable(tbl);
+```
+
+**_[Go back to project home](`r yml$project$Home`)_**
+
+# Individual files
+
+Summary of individual files in separate tables (each row represents a field):
+
+```{r write_out_1, include=FALSE}
+lns<-lapply(names(smm), function(nm) {
+  hd<-paste('## File name: **_', nm, '_**', sep=''); 
+  ln<-as.list(kable(smm[[nm]]$table));
+  c(hd, '\n', ln, '\n\n', "<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+", '***\n'); 
+}); 
+lns<-do.call('c', lns); 
+lns<-paste(lns, collapse='\n'); 
+```
+
+`r lns`
+
+
+***
+  _END OF DOCUMENT_

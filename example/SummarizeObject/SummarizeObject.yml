@@ -1,0 +1,8 @@
+home: https://github.com/zhezhangsh/awsomics
+output: /home/zhangz/R/source/awsomics/example/SummarizeObject/test
+description: This is a test run
+file:
+- /home/zhangz/R/source/awsomics/example/SummarizeObject/test/count_sample.rds
+- /home/zhangz/R/source/awsomics/example/SummarizeObject/test/count.rds
+- /home/zhangz/R/source/awsomics/example/SummarizeObject/test/sample.rds
+
