@@ -1,5 +1,5 @@
 # Use this template to create a report that compares 2 pairwise comparisons of differential gene expression 
-CreateDdReport<-function(yml, overwrite=FALSE) {
+CreateReport<-function(yml, overwrite=FALSE) {
   # yml     The yaml file or an yaml list defines the inputs and parameters of the analysis
   
   library(awsomics);
