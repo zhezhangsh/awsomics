@@ -23,7 +23,7 @@ CreateReport<-function(yml) {
   fn.tmpl<-rev(strsplit(path.tmpl, '/')[[1]])[1]; 
   fn.yaml<-paste(sub('Rmd$', '', fn.tmpl, ignore.case = TRUE), 'yml', sep='')
   if (file.exists(path.tmpl)) file.copy(path.tmpl, paste(path, fn.tmpl, sep='/')) else 
-    if (RCurl::url.exists(path.tmpl)) writeLines(RCurl::getURL(path.tmpl, paste(path, fn.tmpl, sep='/'))) else 
+    if (RCurl::url.exists(path.tmpl)) writeLines(RCurl::getURL(path.tmpl), paste(path, fn.tmpl, sep='/')) else 
       stop('Rmarkdown template file: ', path.tmpl, ' not exist.\n'); 
   writeLines(as.yaml(yml), paste(path, fn.yaml, sep='/'));
   
