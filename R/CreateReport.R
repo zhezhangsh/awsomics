@@ -36,7 +36,7 @@ CreateReport<-function(yml) {
   if (file.exists(fn.md)) file.remove(fn.md); 
   
   # Run template, save error message
-  errors$knit<-try(knit('DdReport.Rmd', fn.md)); 
+  errors$knit<-try(knit(fn.tmpl, fn.md)); 
   
   # Convert markdown file to html file
   errors$render<-try(rmarkdown::render(fn.md, output_format="html_document", output_file="index.html", output_dir=path, 
