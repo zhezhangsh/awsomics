@@ -12,19 +12,20 @@ output:
 library(knitr); 
 library(ascii);
 
-yml<-yaml::yaml.load_file("/home/zhangz/R/source/awsomics/example/SummarizeObject/SummarizeObject.yml");
+yml<-yaml::yaml.load_file("./SummarizeObject.yml");
 fn<-yml$file;
 nm<-sapply(strsplit(fn, '/'), function(x) rev(x)[1]); 
 nm<-substr(nm, 1, sapply(gregexpr('\\.', nm), function(x) x[length(x)])-1); 
 names(fn)<-nm; 
 ```
 
-<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+<div align='right'>**_[Go back to project home](`r yml$home`)_**</div>
 
 This is an R Markdown document that summarizes a set of table-like R objects. It reports the types (_data.frame_, _matrix_, _GRanges_, etc.), field names, field classes, and summary of field values for each object. 
 
 ```{r, summarize_object, include=FALSE}
 summaryObj<-function(fn) {
+  print(fn); 
   obj<-readRDS(fn); 
   cll<-class(obj); 
   if (cll=='GRanges') obj<-as.data.frame(elementMetadata(obj)); 
@@ -41,6 +42,10 @@ summaryObj<-function(fn) {
     val<-t(sapply(fld, function(x) x[c(1, ceiling(length(x)/2), length(x))])); 
     colnames(val)<-c('First', 'Middle', 'Last'); 
     tbl<-data.frame(Class=cls, Count=cnt, Level=sapply(fld, length),  val, stringsAsFactors = FALSE); 
+    rownames(tbl)<-gsub('\\.', '_', rownames(tbl)); 
+    colnames(tbl)<-gsub('\\.', '_', colnames(tbl)); 
+    rownames(tbl)<-gsub('[_]+', '_', rownames(tbl)); 
+    colnames(tbl)<-gsub('[_]+', '_', colnames(tbl)); 
   } else {
     n1<-0;
     n2<-0;
@@ -55,7 +60,7 @@ smm<-lapply(fn, summaryObj);
 names(smm)<-names(fn); 
 ```
 
-<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+<div align='right'>**_[Go back to project home](`r yml$home`)_**</div>
 
 # All files
 
@@ -69,7 +74,7 @@ tbl<-data.frame(File_size=format(info[, 'size'], big.mark = ','), tbl, Modify_ti
 kable(tbl);
 ```
 
-**_[Go back to project home](`r yml$project$Home`)_**
+<div align='right'>**_[Go back to project home](`r yml$home`)_**</div>
 
 # Individual files
 
@@ -79,7 +84,7 @@ Summary of individual files in separate tables (each row represents a field):
 lns<-lapply(names(smm), function(nm) {
   hd<-paste('## File name: **_', nm, '_**', sep=''); 
   ln<-as.list(kable(smm[[nm]]$table));
-  c(hd, '\n', ln, '\n\n', "<div align='right'>**_[Go back to project home](`r yml$Home`)_**</div>
+  c(hd, '\n', ln, '\n\n', "<div align='right'>**_[Go back to project home](", yml$home, ")_**</div>
 ", '***\n'); 
 }); 
 lns<-do.call('c', lns); 
