@@ -3,7 +3,6 @@ export("AddAPCluster");
 export("AddHref");
 export("BiclusterFromList");
 export("CalculateColoredBlockSize");
-export("CreateReport");
 export("CollectGwasDbData");
 export("ConnectToGwasDb");
 export("ConnectToVariantPositionDb");
