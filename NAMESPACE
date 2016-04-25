@@ -69,6 +69,8 @@ export("SnpPosFromGwasDb");
 export("Symbol2Entrez");
 export("TestGSE");
 export("TextOverlap");
+export("TrimPath");
+export("TruncatePathPrefix");
 export("UrlDbsnpId");
 export("UrlEntrezGene");
 export("UrlUcscPosition");
