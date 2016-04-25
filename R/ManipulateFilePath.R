@@ -2,10 +2,10 @@
 
 # Truncate a path to remove a given prefix
 TruncatePathPrefix<-function(path, prefix) {
-  # pth    The original path, usually an absolute path to a file or folder
+  # path    The original path, usually an absolute path to a file or folder
   # prefix  The prefix of path to be removed
   
-  pth<-sub(prefix, '', path); 
+  path<-sub(prefix, '', path); 
   path<-sapply(path, function(path) {
     while(grepl('^/', path)) path<-sub('^/', '', path); 
     path;
