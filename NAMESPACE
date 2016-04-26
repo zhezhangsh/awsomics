@@ -58,6 +58,7 @@ export("PlotSeries");
 export("PlotVenn");
 export("PlotVenn3Way");
 export("ReformatMotifHits");
+export("RemoveExtension"); 
 export("RetrieveGadem");
 export("ReverseCompHits");
 export("RunGap");
