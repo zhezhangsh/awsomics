@@ -64,15 +64,6 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
   image(0:nc, 0:nr, t(d[nr:1,]), col=col, breaks=breaks, add=TRUE);
 
   # column background label
-  #   if (length(groups) > 0) {
-  #     c0<-gplots::colorpanel(length(groups), "#CCCCCC", "#FFEE00");
-  #     c1<-rep('#FFFFFF', ncol(d)); 
-  #     names(c1)<-colnames(d); 
-  #     for (i in 1:length(groups)) c1[names(c1) %in% groups[[i]]]<-c0[i]; 
-  #     rect(0:(ncol(d)-1), nrow(d), 1:ncol(d), limit.h, border=NA, col=c1)
-  #   }
-  
-  # column background label
   if (length(groups) > 0) {
     c0<-rep('#FFFFFF', length(groups));
     c0[seq(1, length(groups), 2)]<-"#DDDDDD"
@@ -113,8 +104,12 @@ PlotColoredBlock<-function(d, min=NA, max=NA, num.breaks=15, key='', groups=c())
     key.y<-c(nr + 0.4*key.h, nr + 0.6*key.h); 
     image(seq(key.x[1], key.x[2], length.out=num.breaks+1), key.y, matrix(breaks, nc=1), col=col, breaks=breaks, add=TRUE);
     
-    min<-round(min, ceiling(log10(abs(min)))); 
-    max<-round(max, ceiling(log10(abs(min)))); 
+    # Round key labels
+    abs<-max(abs(max), abs(min));
+    if (abs>=100) rnd<-0 else if(abs>=10) rnd<-2 else if (abs>=1) rnd<-3 else if (abs==0) rnd<-1 else 
+      rnd<-ceiling(-log10(abs))+2;
+    min<-round(min, rnd); 
+    max<-round(max, rnd); 
     
     text(nc+0.15*key.w, nr + 0.4*key.h, pos=1, label=min, cex=0.8*cex.h); 
     text(nc+0.85*key.w, nr + 0.4*key.h, pos=1, label=max, cex=0.8*cex.h); 
