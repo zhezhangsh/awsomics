@@ -7,6 +7,7 @@ export("CollectGwasDbData");
 export("ConnectToGwasDb");
 export("ConnectToVariantPositionDb");
 export("ConvertPdf2Png");
+export("CalcLmSigma");
 export("CountWordsFreq");
 export("CreateDatatable");
 export("FormatNumeric");
