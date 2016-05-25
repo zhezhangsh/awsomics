@@ -26,7 +26,7 @@ CalcLmSigma <- function(x, y, plot=FALSE, xlab=NA, ylab=NA) {
     points(x, y, col='black', pch=19, cex=.2);
     abline(lm(y~x), col='blue', lty=2);
     if (cor(c[, 1], c[, 2], use='pair') > 0) loc <- 'topleft' else loc <- 'topright';
-    legend(loc, legend=c('Num_Sigma < 1.5', 'Num_Sigma >= 1.5', 'Num_Sigma >=3.0'), cex=1.25, bty='n', pch=18, 
+    legend(loc, legend=c('Num_Sigma < 1.5', 'Num_Sigma >= 1.5', 'Num_Sigma >=3.0'), cex=1, bty='n', pch=18, 
            col=c('#88888888', '#FF888888', '#FF000088')); 
     abline(lm(y~x), col='blue', lty=2);
   }
