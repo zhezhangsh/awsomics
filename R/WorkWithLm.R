@@ -14,7 +14,7 @@ CalcLmSigma <- function(x, y, plot=FALSE, xlab=NA, ylab=NA) {
     coe<-as.vector(coefficients(mdl)); 
     prd<-c[i, 1]*coe[2]+coe[1]; 
     sig<-summary(mdl)$sigma;
-    (prd-c[i, 2])/sig; 
+    (c[i, 2]-prd)/sig; 
   }); 
   
   if (plot) {
