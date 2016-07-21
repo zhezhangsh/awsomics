@@ -1,5 +1,24 @@
 # Utility functions related to file path
 
+# Convert absolute to relative path, using a reference path as the current path
+ConvertPath2Relative <- function(path, curr) {
+  
+  x <- strsplit(path, '/')[[1]]; 
+  y <- strsplit(curr, '/')[[1]];
+  x <- x[x!=''];
+  y <- y[y!=''];
+  l <- min(length(x), length(y)); 
+  
+  if (l==0) ind <- integer() else ind <- which(x[1:l]==y[1:l]);
+  if (length(ind) == 0) ind <- 0 else ind <- max(ind); 
+  
+  x <- paste(x[(ind+1):length(x)], collapse='/'); 
+  y <- paste(rep('../', length(y)-ind), collapse=''); 
+  z <- paste(y, x, sep='');
+  
+  z; 
+}
+
 # Truncate a path to remove a given prefix
 TruncatePathPrefix<-function(path, prefix) {
   # path    The original path, usually an absolute path to a file or folder

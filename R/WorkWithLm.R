@@ -22,7 +22,7 @@ CalcLmSigma <- function(x, y, plot=FALSE, xlab=NA, ylab=NA) {
     col <- rep('#88888888', length(x)); 
     col[abs(sigma) >= 1.5] <- '#FF888888'; 
     col[abs(sigma) >= 3.0] <- '#FF000088'; 
-    plot(x, y, col=col, pch=19, cex=2, xlab='Total input (million)', ylab='Uniquely mapped (million)', cex.lab=1.5); 
+    plot(x, y, col=col, pch=19, cex=2, xlab=xlab, ylab=ylab, cex.lab=1.5); 
     points(x, y, col='black', pch=19, cex=.2);
     abline(lm(y~x), col='blue', lty=2);
     if (cor(c[, 1], c[, 2], use='pair') > 0) loc <- 'topleft' else loc <- 'topright';

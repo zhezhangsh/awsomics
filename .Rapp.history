@@ -1,0 +1,52 @@
+?wald.test
+library(aod)
+?wald.test
+data(orob2)#
+  fm <- quasibin(cbind(y, n - y) ~ seed * root, data = orob2)#
+  # Wald test for the effect of root
+str(fm)
+wald.test(b = coef(fm), Sigma = vcov(fm), Terms = 3:4)
+coef(fm)
+vcov(fm)
+names(fm)
+args(vcov)
+?predict
+rnorm(1000) -> x
+rnorm(1000000) -> x
+ys <- sapply(1:10, function(i) sample(0:1, replace=TRUE))
+dim(ys)
+ys <- sapply(1:10, function(i) sample(0:1, 10^6, replace=TRUE))
+dim(ys)
+ys <- lapply(1:10, function(i) ys[, i])
+str(ys)
+head(x)
+system.time(model <- glm(ys[[1]]~x))
+system.time(model <- glm(ys[[1]][1:50000]~x, family='binomial'))
+system.time(model <- glm(ys[[1]][1:50000]~x[1:50000], family='binomial'))
+system.time(model <- glm(ys[[1]][1:100000]~x[1:100000], family='binomial'))
+parallel::mclapply(ys, function(y) glm(y[1:100000]~x[1:100000], family='binomial'))
+system.time(parallel::mclapply(ys, function(y) glm(y[1:100000]~x[1:100000], family='binomial')->model))
+system.time(parallel::mclapply(ys, function(y) glm(y[1:100000]~x[1:100000], family='binomial'))->model)
+system.time(parallel::mclapply(ys, function(y) glm(y[1:100000]~x[1:100000], family='binomial'), mc.core=4)->model)
+system.time(parallel::mclapply(ys, function(y) glm(y[1:100000]~x[1:100000], family='binomial'), mc.core=2)->model)
+args(parallel::mclapply)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=2)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=4)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=8)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[1:100000], family='binomial')}, mc.cores=10)->model)
+x <- matrix(x, nc=10)
+dim(x)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[, 1:3], family='binomial')}, mc.cores=10)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y[1:100000]~x[, 1:3], family='binomial')}, mc.cores=5)->model)
+?system.time
+ys <- lapply(1:100, function(i) sample(0:1, 100000, replace=TRUE))
+str(ys)
+system.time(parallel::mclapply(ys, function(y) {glm(y~x[, 1:3], family='binomial')}, mc.cores=10)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y~x[, 1:3], family='binomial')}, mc.cores=5)->model)
+system.time(parallel::mclapply(ys, function(y) {glm(y~x[, 1:3], family='binomial')}, mc.cores=20)->model)

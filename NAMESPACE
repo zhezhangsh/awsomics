@@ -6,6 +6,7 @@ export("CalculateColoredBlockSize");
 export("CollectGwasDbData");
 export("ConnectToGwasDb");
 export("ConnectToVariantPositionDb");
+export("ConvertPath2Relative");
 export("ConvertPdf2Png");
 export("CalcLmSigma");
 export("CountWordsFreq");
