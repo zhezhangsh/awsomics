@@ -1,0 +1,73 @@
+
+Listening on http://127.0.0.1:38617
+Loading required package: XML
+Loading required package: readxl
+Loading required package: shinythemes
+Loading required package: rchive
+Loading required package: awsomics
+Loading required package: devtools
+Loading required package: RCurl
+Loading required package: bitops
+Loading required package: RoCA
+Loading required package: DEGandMore
+Loading required package: snow
+
+Attaching package: ‘DEGandMore’
+
+The following object is masked from ‘package:awsomics’:
+
+    AddAPCluster
+
+Loading required package: DESeq2
+Loading required package: S4Vectors
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘parallel’
+
+The following objects are masked from ‘package:snow’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, clusterSplit, makeCluster, parApply,
+    parCapply, parLapply, parRapply, parSapply, splitIndices,
+    stopCluster
+
+Note: the specification for S3 class “AsIs” in package ‘BiocGenerics’ seems equivalent to one from package ‘jsonlite’: not turning on duplicate class definitions for this class.
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:snow’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parRapply, parSapply
+
+The following object is masked from ‘package:stats’:
+
+    xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, as.vector, cbind, colnames,
+    do.call, duplicated, eval, evalq, Filter, Find, get, intersect,
+    is.unsorted, lapply, Map, mapply, match, mget, order, paste, pmax,
+    pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce, rep.int,
+    rownames, sapply, setdiff, sort, table, tapply, union, unique,
+    unlist, unsplit
+
+Loading required package: IRanges
+Loading required package: GenomicRanges
+Loading required package: GenomeInfoDb
+Loading required package: Rcpp
+Loading required package: RcppArmadillo
+Note: the specification for S3 class “AsIs” in package ‘DBI’ seems equivalent to one from package ‘jsonlite’: not turning on duplicate class definitions for this class.
+Warning: replacing previous import by ‘ggplot2::Position’ when loading ‘DESeq2’
+
+Execution halted

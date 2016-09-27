@@ -1,0 +1,14 @@
+
+Listening on http://127.0.0.1:57865
+Loading required package: devtools
+Loading required package: RCurl
+Loading required package: bitops
+
+Attaching package: ‘gplots’
+
+The following object is masked from ‘package:stats’:
+
+    lowess
+
+
+Execution halted

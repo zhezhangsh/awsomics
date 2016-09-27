@@ -1,0 +1,6 @@
+Error in eval(expr, envir, enclos) : 
+  The Shiny package was not found in the library. Ensure that 
+Shiny is installed and is available in the Library of the 
+user you're running this application as.
+Calls: local -> eval.parent -> eval -> eval -> eval -> eval
+Execution halted
