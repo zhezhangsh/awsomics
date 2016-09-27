@@ -9,11 +9,11 @@ GENESET_HOME<-paste(RCHIVE_HOME, '/data/gene.set/r', sep=''); # Location of gene
 GEX_HOME<-paste(RCHIVE_HOME, '/data/gex', sep=''); # Gene expression data collections
 
 library(rchive);
-
-# load source code 
-src<-paste(AWSOMICS_HOME, '/R/', dir(paste(AWSOMICS_HOME, '/R/', sep="")), sep='');
-src<-src[grep('.R$', src, ignore.case=TRUE)];
-src<-lapply(src, source); # load functions
+library(awsomics); 
+# load source code
+# src<-paste(AWSOMICS_HOME, '/R/', dir(paste(AWSOMICS_HOME, '/R/', sep="")), sep='');
+# src<-src[grep('.R$', src, ignore.case=TRUE)];
+# src<-lapply(src, source); # load functions
 
 # Loading housekeeping data and custom function
 fn<-paste(APP_HOME, 'source', dir(paste(APP_HOME, 'source', sep='/')), sep='/');

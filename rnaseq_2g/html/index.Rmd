@@ -1,0 +1,75 @@
+---
+title: "RNA-seq 2G"
+author: "Zhe Zhang"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    number_sections: yes
+    self_contained: no
+    toc: yes
+---
+
+<div style="border:black 1px solid; padding: 0.5cm 0.5cm"><font color="darkblue">
+**RNA-seq 2G** is a web portal with >20 statistical methods that perform two-group analysis of differential gene expression. It uses read count data from RNA-seq or similar data matrix as input and generates test statistics in consistent format as output. 
+</font></div>
+
+# Introduction
+
+Two-group comparison of differential expression (DE) is the most common analysis of transcriptome data. For RNA-seq data, the comparison is usually performed on a gene-level matrix of read counts, with the read counts corresponding to the number of sequencing reads mapped to each gene in each RNA-seq sample. 
+
+Statistical methods that have been applied to two-group DE of RNA-seq data are widely different in terms of their assumptions on data distribution, input/output format, performance, sensitivity, and user-friendliness, which are summarized in the table below:
+
+```{r include=FALSE}
+require(knitr);
+require(DEGandMore); 
+require(awsomics); 
+data("DeMethodMeta");
+
+tbl <- data.frame(Name=DeMethodMeta[[1]], Call=rownames(DeMethodMeta), DeMethodMeta[, 2:9], stringsAsFactors = FALSE);
+tbl[[1]] <- AddHref(tbl[[1]], DeMethodMeta$Link); 
+```
+
+<div style="color:darkblue; padding:0 0.5cm;">
+**Table 1** Analysis methods for differential expression. 
+</div>
+
+<div align='center', style="padding:0 0.1cm"> 
+`r kable(tbl, row.names=FALSE, format='markdown')`
+</div>
+
+  - **Name**: Method names to be showed on the web portal.
+  - **Call**: The names of the re-implemented functions in the [DEGandMore](http://github.com/zhezhangsh/DEGandMore) package. 
+  - **Default**: An arbitrarily selected popular DE methods.
+  - **Speed**: How much time the DE method takes to finish. Typically, _fast_ methods take a few seconds, _medium_ methods take up to a minute, and _slow_ methods take a few minutes or more. Therefore, the waiting time will be long if any _slow_ methods are selected.
+  - **Paired**: Whether the method supports paired test.
+  - **Logged**: Wehther the original method is performed on transformed data in logged scale.
+  - **Normalization**: Whether the method has its own internal normalization procedure. 
+  - **Distribution**: Which data distribution the original method is based upon. 
+  - **Test**: The statistical test used by the method. 
+  - **Function**: The main function and package within which the method was originally implemented. 
+
+# Run DE analysis
+
+## Prepare for the analysis
+
+### Read count matrix
+
+### Grouping samples
+
+### Other parameters
+
+## Run DE analysis online
+
+## Run DE analysis offline
+
+# Browse DE results
+
+## Test statistics 
+
+
+
+
+
+
+***
+_END OF DOCUMENT_
