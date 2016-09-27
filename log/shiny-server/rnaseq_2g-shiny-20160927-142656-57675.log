@@ -1,0 +1,20 @@
+
+Listening on http://127.0.0.1:57675
+Loading required package: XML
+Loading required package: readxl
+Loading required package: shinythemes
+Loading required package: rchive
+Loading required package: awsomics
+Loading required package: devtools
+Loading required package: RCurl
+Loading required package: bitops
+Loading required package: RoCA
+Loading required package: DEGandMore
+Loading required package: snow
+
+Attaching package: ‘DEGandMore’
+
+The following object is masked from ‘package:awsomics’:
+
+    AddAPCluster
+
